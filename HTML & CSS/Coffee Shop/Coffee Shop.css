@@ -1,0 +1,114 @@
+* {
+    padding: 0px;
+    margin: 3px;
+}
+html, body {
+    font-family: 'Raleway', sans-serif;
+    background: #efe8e1; /* fallback */
+    background: -webkit-linear-gradient(top, #efe8e1, #f6f5f4); /* WebKit */
+    background: linear-gradient(to bottom, #efe8e1, #f6f5f4); /* Standard */
+}
+#imgScroll {
+    background-image: url('coffee top v2.jpg'); /*uploads my image to the div*/
+    width: 80%; /*% instead of vw because % works better with parent element rather than vw that works with the screen width*/
+    height: 720px;
+    display: flex; /*display: Defines how an element is rendered in the document flow. Look at the bottom for explanation*/
+    margin: auto;
+    background-attachment: fixed; /*Determines how the background image behaves when scrolling.*/
+    background-size: cover; /*Controls how the background image is scaled inside the element*/
+    justify-content: center;
+    align-items: center;
+    background-position: center center; /*This lets you decide where the image stays visible if it gets cropped*/
+}
+#main {
+    background: #ffffff;
+    margin: 0vh 15vw;
+    margin-top: 7vh;
+    padding-bottom: 3vh;
+}
+h3 {
+    text-align: center; /*Use this to align text*/
+    font-size: clamp(1.7rem, 4vw, 2.5rem); /*it's used to make text responsive across screens: clamp(Min size, fluid scaling, max size);*/
+    margin-bottom: 50px;
+    padding-top: 5vh;
+    font-weight: 200;
+    font-family: Arial, Helvetica, sans-serif;
+}
+#intro p {
+    text-align: center;
+    color: #7d7873;
+    font-size: clamp(0.5rem, 2.5vw, 1rem);
+    margin-bottom: 30px;
+}
+.roast {
+    color: #ffffff;
+    padding: 20px;
+    margin: 0px 20px; /*margin 0 to make the colors stick together*/
+}
+.roast h4 {
+    margin: 2vh 0vw;
+    font-size: clamp(1rem, 3vw, 1.75rem);
+    font-weight: 700;
+}
+.roast p {
+    font-size: clamp(0.5em, 2.5vw, 1rem);
+}
+.temp {
+    margin-bottom: 2vh;
+    font-weight: 100;
+    font-size: clamp(0.3rem, 2.5rem, 0.7rem);
+}
+.green {
+    background-color: #9ac29a;
+}
+.light {
+    background-color: #a96342;
+}
+.city {
+    background-color: #96572a;
+}
+.vienna {
+    background-color: #ae3f3f;
+}
+.italy {
+    background-color: #191919;
+}
+#origin {
+    margin: 9vh 14vw;
+}
+.origin {
+    padding: 50px;
+}
+.origin h2 {
+    color: #e4bb97;
+    font-weight: 600;
+    font-size: clamp(1.3rem, 4vw, 1.7em);
+}
+.origin p {
+    color: #7c7c7c;
+    font-size: clamp(0.5em, 2.5vw, 1rem);
+}
+a {
+    color: #191919;
+    text-decoration: none;
+    font-weight:650;
+    font-size: clamp(0.5em, 2.5vw, 1rem);
+}
+a:hover {
+    color: #575757;
+}
+hr {
+    border: solid 1px #e4bb97;
+}
+
+/*
+    Common values display:
+  - block: Element takes up full width, starts on a new line (e.g. <div>, <p>)
+  - inline: Element flows within text, ignores width/height (e.g. <span>)
+  - inline-block: Like inline, but respects width/height
+  - none: Hides the element completely (no space taken)
+  - flex: Turns the element into a flex container (for flexible layouts)
+  - grid: Turns the element into a grid container (for grid-based layouts)
+  - contents: Makes the element disappear visually, but keeps its children
+
+*/
