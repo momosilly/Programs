@@ -18,4 +18,3 @@ class UserInfo:
    
 user = UserInfo()
 user.login()
-print("Edited")
