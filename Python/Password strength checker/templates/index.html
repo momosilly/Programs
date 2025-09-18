@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Password checker</title>
+    </head>
+    <body>
+        <h2>Password strength checker</h2>
+        <form method="post">
+            <label for="password">Enter your password</label>
+            <br>
+            <input type="password" name="password" required>
+            <br>
+            <br>
+            <label>Would you like to generate a stronger password?</label>
+            <br>
+            <input type="radio" name="generate" value="yes" checked> Yes
+            <br>
+            <input type="radio" name="generate" value="no"> No
+            <br>
+        </form>
+        {% if strength %}
+        <p><strong>Strength:</strong>{{ strength }}</p>
+        {% endif %}
+
+        {% if new_password %}
+        <p><strong>Suggested password:</strong>{{ new_password }}</p>
+        {% endif %}
+    </body>
+</html>
