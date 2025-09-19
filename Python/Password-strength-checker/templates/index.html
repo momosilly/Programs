@@ -8,7 +8,7 @@
     </head>
     <body>
         <h2>Password strength checker</h2>
-        <form method="post" name="passwordForm">
+        <form method="post" action="/submit-password">
             <label for="password">Enter your password</label>
             <br>
             <input type="password" name="password" required>
@@ -23,7 +23,7 @@
         <p><strong>Suggested password:</strong>{{ new_password }}</p>
         {% endif %}
         <div id="gen">
-        <form method="post" name="generateForm">
+        <form method="post" action="/submit-generate">
             <label>Would you like to generate a stronger password?</label>
             <br>
             <input type="radio" name="generate" value="yes"> Yes

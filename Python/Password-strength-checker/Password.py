@@ -42,14 +42,21 @@ def generate_pass(length=12):
     password = ''.join(secrets.choice(characters) for _ in range(length))
     return password
 
-@app.route("/", methods=['GET', 'POST'])
-def index():
+@app.route("/", methods=['GET'])
+def home():
+    return render_template('index.html')
+@app.route("/submit-password", methods=['POST'])
+def handle_password():
     strength = None
-    new_password = None
     if request.method == "POST":
         user_password = request.form['password']
         strength = check_strength(user_password)
-    return render_template('index.html', strength=strength, new_password=new_password)
-@app.route("/")
+    return render_template('index.html', strength=strength)
+@app.route("/submit-generate", methods=['POST'])
+def handle_generate():
+    new_password = None
+    if request.form.get('generate') == 'yes':
+        new_password = generate_pass()
+    return  render_template('index.html', new_password=new_password)
 if __name__ == '__main__':
     app.run(debug=True)
