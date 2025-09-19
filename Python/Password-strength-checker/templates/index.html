@@ -8,7 +8,7 @@
     </head>
     <body>
         <h2>Password strength checker</h2>
-        <form method="post">
+        <form method="post" name="passwordForm">
             <label for="password">Enter your password</label>
             <br>
             <input type="password" name="password" required>
@@ -23,13 +23,16 @@
         <p><strong>Suggested password:</strong>{{ new_password }}</p>
         {% endif %}
         <div id="gen">
+        <form method="post" name="generateForm">
             <label>Would you like to generate a stronger password?</label>
             <br>
             <input type="radio" name="generate" value="yes"> Yes
             <br>
             <input type="radio" name="generate" value="no"> No
+            <br>
             <button type="submit">Generate</button>
-            </div>
+        </form>
+        </div>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 var genDiv = document.getElementById('gen');
