@@ -3,6 +3,8 @@
     <head>
         <meta charset="utf-8">
         <title>Password checker</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    </head>
     </head>
     <body>
         <h2>Password strength checker</h2>
@@ -10,13 +12,6 @@
             <label for="password">Enter your password</label>
             <br>
             <input type="password" name="password" required>
-            <br>
-            <br>
-            <label>Would you like to generate a stronger password?</label>
-            <br>
-            <input type="radio" name="generate" value="yes" checked> Yes
-            <br>
-            <input type="radio" name="generate" value="no"> No
             <br>
             <button type="submit">Check strength</button>
         </form>
@@ -27,5 +22,25 @@
         {% if new_password %}
         <p><strong>Suggested password:</strong>{{ new_password }}</p>
         {% endif %}
+        <div id="gen">
+            <label>Would you like to generate a stronger password?</label>
+            <br>
+            <input type="radio" name="generate" value="yes"> Yes
+            <br>
+            <input type="radio" name="generate" value="no"> No
+            <button type="submit">Generate</button>
+            </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                var genDiv = document.getElementById('gen');
+
+                var strengthElem = document.querySelector('p strong');
+                if (strengthElem && strengthElem.parentNode.textContent)
+                    var result = strengthElem.parentNode.textContent.toLowerCase();
+                    if (result.includes('weak') || result.includes('very weak') || result.includes('moderate')) {
+                        genDiv.style.display = 'block';
+                    }
+            })
+        </script>
     </body>
 </html>

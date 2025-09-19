@@ -50,8 +50,8 @@ def index():
         user_password = request.form['password']
         strength = check_strength(user_password)
         if "Weak" in strength or "Very Weak" in strength or "Moderate" in strength:
-            if request.form == 'yes':
+            if request.form.get('generate') == 'yes':
                 new_password = generate_pass()
-        return render_template('index.html', strength=strength, new_password=new_password)
+    return render_template('index.html', strength=strength, new_password=new_password)
 if __name__ == '__main__':
     app.run(debug=True)
