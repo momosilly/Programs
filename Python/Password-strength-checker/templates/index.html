@@ -7,31 +7,35 @@
     </head>
     </head>
     <body>
-        <h2>Password strength checker</h2>
         <div id="main">
+        <h2>Password strength checker</h2>
         <form method="post" action="/submit-password">
             <div id="input-group">
-            <input type="password" name="password" placeholder="" required>
+            <input type="password" name="password" placeholder="" id="passwordInput" required>
             <label for="password" id="passLabel">Enter your password</label>
             </div>
             <br>
             <button type="submit">Check strength</button>
         </form>
         {% if strength %}
-        <p><strong>Strength:</strong>{{ strength }}</p>
+        <p><strong>Strength: </strong>{{ strength }}</p>
         {% endif %}
 
         {% if new_password %}
-        <p><strong>Suggested password:</strong>{{ new_password }}</p>
+        <p><strong>Suggested password: </strong>{{ new_password }}</p>
         {% endif %}
         <div id="gen">
         <form method="post" action="/submit-generate">
             <label>Would you like to generate a stronger password?</label>
             <br>
-            <input type="radio" name="generate" value="yes"> Yes
+            <div id="radios">
+            <label for="">Yes</label>
+            <input type="radio" name="generate" value="yes" class="yes radio">
             <br>
-            <input type="radio" name="generate" value="no"> No
+            <label for="">No</label>
+            <input type="radio" name="generate" value="no" class="no radio">
             <br>
+            </div>
             <button type="submit">Generate</button>
         </form>
         </div>
