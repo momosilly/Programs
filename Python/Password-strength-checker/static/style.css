@@ -8,6 +8,7 @@ html {
 h2 {
     text-align: center;
     align-items: center;
+    margin-bottom: 15px;
 }
 #main {
     text-align: center;
@@ -59,9 +60,6 @@ button {
     border: 0px;
     border-radius: 5px;
     padding: 10px 25px;
-}
-h2 {
-    margin-bottom: 15px;
 }
 #radios {
     margin: 10px 0px;
