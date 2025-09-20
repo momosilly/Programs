@@ -1,3 +1,63 @@
+html {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: rgb(243, 246, 249);
+}
 #gen {
     display: none;
+}
+h2 {
+    text-align: center;
+    align-items: center;
+}
+#main {
+    text-align: center;
+    align-items: center;
+    background-color: #fff;
+    border-radius: 8px;
+    margin: 31vh;
+    padding: 35px;
+}
+#input-group {
+    position: relative;
+    margin: 30px 0px;
+}
+input {
+    width: 100%;
+    padding: 12px 10px;
+    font-size: 16px;
+    border: 2px solid #ccc;
+    border-radius: 4px;
+    outline: none;
+}
+/* When input is focused OR has content, move the label up */
+input:focus + #passLabel, 
+input:not(:placeholder-shown) + #passLabel {
+    top: -8px;
+    left: 8px;
+    font-size: 12px;
+    color: #007BFF;
+}
+/* Input focus styling */
+input:focus {
+    border-color: #007BFF;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+}
+#passLabel {
+  position: absolute; /* Allows label to float over input */
+
+  top: 12px;
+  left: 10px;
+  color: #999;
+  background-color: white;
+  padding: 0 4px;
+  transition: 0.2s ease;
+  pointer-events: none; /*keeps the label from interfering with user interaction.*/
+}
+button {
+    font-size: 1em;
+    background: rgb(109, 109, 255);
+    color: #fff;
+    border: 0px;
+    border-radius: 5px;
+    padding: 10px 25px;
 }

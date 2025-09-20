@@ -8,10 +8,12 @@
     </head>
     <body>
         <h2>Password strength checker</h2>
+        <div id="main">
         <form method="post" action="/submit-password">
-            <label for="password">Enter your password</label>
-            <br>
-            <input type="password" name="password" required>
+            <div id="input-group">
+            <input type="password" name="password" placeholder="" required>
+            <label for="password" id="passLabel">Enter your password</label>
+            </div>
             <br>
             <button type="submit">Check strength</button>
         </form>
@@ -32,6 +34,7 @@
             <br>
             <button type="submit">Generate</button>
         </form>
+        </div>
         </div>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
