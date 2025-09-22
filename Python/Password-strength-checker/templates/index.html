@@ -45,11 +45,12 @@
                 var genDiv = document.getElementById('gen');
 
                 var strengthElem = document.querySelector('p strong');
-                if (strengthElem && strengthElem.parentNode.textContent)
+                if (strengthElem && strengthElem.parentNode.textContent) {
                     var result = strengthElem.parentNode.textContent.toLowerCase();
                     if (result.includes('weak') || result.includes('very weak') || result.includes('moderate')) {
                         genDiv.style.display = 'block';
                     }
+                }
             })
         </script>
     </body>
