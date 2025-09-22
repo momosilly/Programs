@@ -10,6 +10,7 @@ language = input("Preferred language? (e.g., en, nl, fr): ").lower()
 actor_name = input("Favorite actor? (optional): ").strip()
 year = input("Preferred release year? (optional): ").strip()
 min_rating = input("Preferred minimum rating: ")
+movie_type = input("What type of movie do you want? (e.g., anime, documentary, sci-fi): ").lower()
 
 mood_to_genre = {
     "happy": ["comedy", "romance", "animation", "music"],
@@ -25,6 +26,17 @@ mood_to_genre = {
     "reflective": ["war", "history", "documentary"],
     "lighthearted": ["comedy", "animation", "family"],
     "dark": ["crime", "thriller", "horror"]
+}
+movie_type_filters = {
+    "animation": {"genre": "16"},
+    "documentary": {"genre": "99"},
+    "sci-fi": {"genre": "878"},
+    "fantasy": {"genre": "14"},
+    "tv movie": {"genre": "10770"},
+    "anime": {"genre": "16", "keyword": "210024"},  # Anime is a subset of animation
+    "crime": {"genre": "80"},
+    "horror": {"genre": "27"},
+    "romance": {"genre": "10749"}
 }
 
 def get_genre_ids():
@@ -49,18 +61,26 @@ def get_actor_id(name):
 def format_language_code(code):
     return f"{code}-US" if code else "en-US"
 
-def build_query(mood, language, actor_name, min_rating):
+def build_query(mood, language, actor_name, min_rating, movie_type):
     genre_ids_map = get_genre_ids()
     genres = mood_to_genre.get(mood, [])
     genre_ids = [str(genre_ids_map[g]) for g in genres if g in genre_ids_map] #!
+
+    type_filter = movie_type_filters.get(movie_type.lower())
+    if type_filter:
+        if "genre" in type_filter:
+            genre_ids.append(type_filter["genre"])
+        if "keyword" in type_filter:
+            params["with_keywords"] = type_filter["keyword"]
 
     actor_id = get_actor_id(actor_name)
     lang_code = format_language_code(language)
 
     params = {
         "api_key": API_KEY,
-        "with_genres": ",".join(genre_ids),
+        "with_genres": "|".join(genre_ids),
         "language": lang_code,
+        "with_original_language": "en",
         "sort_by": "popularity.desc",
         "page": 1
     }
@@ -79,6 +99,8 @@ def get_movies(params):
     for movie in results[:5]:
         print(f"{movie['title']} ({movie['release_date']})")
         print(f"Overview: {movie['overview']}\n")
+    if not results:
+        print("No matches found for that combo. Want to loosen the filters or try a different mood?")
 
-params = build_query(mood, language, actor_name, min_rating)
+params = build_query(mood, language, actor_name, min_rating, movie_type)
 get_movies(params)
