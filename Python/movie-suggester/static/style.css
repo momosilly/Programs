@@ -1,0 +1,127 @@
+html, body {
+    background-color: #f3f6f9;
+    font-family: Arial, Helvetica, sans-serif;
+}
+#main {
+    background-color: #fff;
+    margin: 6% 10% 5% 10%;
+    padding: 3.5%;
+    border-radius: 8px;
+}
+#main h2{
+    align-items: center;
+    text-align: center;
+}
+input[type=number]::-webkit-outer-spin-button
+input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+input[type=number] {
+    appearance: textfield;
+}
+.input-group {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+.inputs {
+    width: 90%;
+    padding: 1.1% 1%;
+    margin: 1.8%;
+    font-size: 16px;
+    border: 2px solid #ccc;
+    border-radius: 4px;
+    outline: none;
+}
+.inputs:focus {
+    border-color: #007BFF;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+}
+.labels {
+    color: #999;
+    font-size: 0.95;
+    transition: 0.2s ease;
+    pointer-events: none;
+    background-color: white;
+}
+.lang {
+    position: absolute;
+    top: 33px;
+    left: 40px;
+}
+.langin:focus + .lang,
+.langin:not(:placeholder-shown) + .lang {
+    top: 13px;
+    left: 40px;
+    font-size: 12px;
+    color: #007BFF;
+}
+.actor {
+    position: absolute;
+    top: 33px;
+    left: 40px;
+}
+.actorin:focus + .actor,
+.actorin:not(:placeholder-shown) + .actor {
+    top: 13px;
+    left: 40px;
+    font-size: 12px;
+    color: #007BFF;
+}
+.year {
+    position: absolute;
+    top: 33px;
+    left: 40px;
+}
+.yearin:focus + .year,
+.yearin:not(:placeholder-shown) + .year {
+    top: 13px;
+    left: 40px;
+    font-size: 12px;
+    color: #007BFF;
+}
+.yearin {
+    appearance: none;
+}
+.rating {
+    position: absolute;
+    top: 33px;
+    left: 40px;
+}
+.ratingin:focus + .rating,
+.ratingin:not(:placeholder-shown) + .rating {
+    top: 13px;
+    left: 40px;
+    font-size: 12px;
+    color: #007BFF;
+}
+button {
+    font-size: 1em;
+    background-color: rgb(109, 109, 255);
+    color: #fff;
+    border: 0px;
+    border-radius: 5px;
+    padding: 10px 25px;
+}
+button:hover {
+    background-color: rgb(134, 134, 255);
+    color: black;
+}
+select {
+    padding: 10px 15px 10px 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background: #f3f6f9;
+    color: #333;
+    font-size: 14px;
+    appearance: none;
+    background: #f3f6f9 url('data:image/svg+xml;utf8,<svg fill=\"%23333\" height=\"16\" viewBox=\"0 0 24 24\" width=\"16\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M7 10l5 5 5-5z\"/></svg>') no-repeat right 10px center;
+    background-size: 16px 16px;
+    background-position-x: right;
+}
+option {
+    color: #333;
+    background-color: #fff;
+    font-size: 14px;
+}

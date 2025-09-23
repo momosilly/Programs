@@ -9,13 +9,56 @@
         <div id="main">
         <h2>Movie suggester</h2>
         <form action="/filters" method="post">
-            <input type="text" name="mood" required>
-            <input type="text" name="language" required>
-            <input type="text" name="actor">
-            <input type="number" name="year">
-            <input type="number" name="rating">
-            <input type="text" name="type">
-            <button type="submit">Check</button>
+                <label for="mood">Choose your mood:</label>
+                <select name="mood" id="mood" required>
+                    <option value="" disabled selected>Select a mood</option>
+                    <option value="happy">Happy</option>
+                    <option value="sad">Sad</option>
+                    <option value="adventurous">Adventurous</option>
+                    <option value="curious">Curious</option>
+                    <option value="thoughtful">Thoughtful</option>
+                    <option value="nostalgic">Nostalgic</option>
+                    <option value="energetic">Energetic</option>
+                    <option value="romantic">Romantic</option>
+                    <option value="scared">Scared</option>
+                    <option value="escapist">Escapist</option>
+                    <option value="reflective">Reflective</option>
+                    <option value="lighthearted">Lighthearted</option>
+                    <option value="dark">Dark</option>
+                </select>
+                <div class="input-group">
+                    <input type="text" name="language" class="inputs langin" placeholder="" required>
+                    <label for="" class="labels  lang">What's your preffered language</label>
+                </div>
+                <div class="input-group">
+                    <input type="text" name="actor" class="inputs actorin" placeholder="">
+                    <label for="" class="labels  actor">Who's your favorite actor? <span>(optional)</span></label>
+                </div>
+                <div class="input-group">
+                    <input type="number" name="year" class="inputs yearin" placeholder="">
+                    <label for="" class="labels  year">What's your preffered release year <span>(optional)</span></label>
+                </div>
+                <div class="input-group">
+                    <input type="number" name="rating" class="inputs ratingin" placeholder="">
+                    <label for="" class="labels  rating">What's the preffered minimum rating <span>(optional)</span></label>
+                </div>
+                <br>
+                <label for="type">Choose a movie type:</label>
+             <select name="type" id="type">
+                <option value="" disabled selected>Select a type</option>
+                <option value="animation">Animation</option>
+                <option value="documentary">Documentary</option>
+                <option value="sci-fi">Sci-Fi</option>
+                <option value="fantasy">Fantasy</option>
+                <option value="tv movie">TV Movie</option>
+                <option value="anime">Anime</option>
+                <option value="crime">Crime</option>
+                <option value="horror">Horror</option>
+                <option value="romance">Romance</option>
+             </select>
+             <br>
+             <br>
+             <button type="submit">Check</button>
         </form>
         {% if results %}
             {% if results is string %}
