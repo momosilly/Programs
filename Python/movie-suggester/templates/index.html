@@ -6,6 +6,7 @@
         <link rel="stylesheet" href="{{url_for('static', filename='style.css')}}">
     </head>
     <body>
+        <div id="main">
         <h2>Movie suggester</h2>
         <form action="/filters" method="post">
             <input type="text" name="mood" required>
@@ -17,7 +18,19 @@
             <button type="submit">Check</button>
         </form>
         {% if results %}
-        <p>Results:<br>{{ results|replace('\n', '<br>')|safe }}</p>
+            {% if results is string %}
+                <p>{{ results }}</p>  <!-- fallback message from Python -->
+            {% else %}
+                {% for movie in results %}
+                    <div class="movie-card">
+                        <img src="{{ movie.poster_url }}" alt="{{ movie.title }} poster">
+                        <h3>{{ movie.title }} ({{ movie.release_date }})</h3>
+                        <p>{{ movie.overview }}</p>
+                    </div>
+                {% endfor %}
+            {% endif %}
         {% endif %}
+
+        </div>
     </body>
 </html>

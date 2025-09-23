@@ -95,14 +95,24 @@ def build_query(mood, language, actor_name, min_rating, movie_type, release_year
 
 def get_movies(params):
     url = "https://api.themoviedb.org/3/discover/movie"
+    IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500"
+    DEFAULT_POSTER = "https://via.placeholder.com/500x750?text=No+Image"
     response = requests.get(url, params=params)
     results = response.json().get("results", [])
     movies = []
     for movie in results[:5]:
-        movies.append(f"{movie['title']} ({movie['release_date']})\nOverview: {movie['overview']}\n")
+        poster_path = movie.get("poster_path")
+        poster_url = IMAGE_BASE_URL + poster_path if poster_path else DEFAULT_POSTER
+
+        movies.append({
+            "title": movie["title"],
+            "release_date": movie.get("release_date", "N/A"),
+            "overview": movie.get("overview", "No overview available"),
+            "poster_url": poster_url
+        })
     if not results:
         return "No matches found for that combo. Want to loosen the filters or try a different mood?"
-    return "\n".join(movies)
+    return movies
 
 #params = build_query(mood, language, actor_name, min_rating, movie_type, release_year)
 #get_movies(params)
