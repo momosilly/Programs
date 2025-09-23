@@ -3,10 +3,11 @@
     <head>
         <meta charset="utf-8">
         <title>Movie suggester</title>
+        <link rel="stylesheet" href="{{url_for('static', filename='style.css')}}">
     </head>
     <body>
         <h2>Movie suggester</h2>
-        <form action="/filters">
+        <form action="/filters" method="post">
             <input type="text" name="mood" required>
             <input type="text" name="language" required>
             <input type="text" name="actor">
@@ -16,7 +17,7 @@
             <button type="submit">Check</button>
         </form>
         {% if results %}
-        <p>Results: {{ results }}</p>
+        <p>Results:<br>{{ results|replace('\n', '<br>')|safe }}</p>
         {% endif %}
     </body>
 </html>

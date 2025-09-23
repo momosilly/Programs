@@ -97,11 +97,12 @@ def get_movies(params):
     url = "https://api.themoviedb.org/3/discover/movie"
     response = requests.get(url, params=params)
     results = response.json().get("results", [])
+    movies = []
     for movie in results[:5]:
-        print(f"{movie['title']} ({movie['release_date']})")
-        print(f"Overview: {movie['overview']}\n")
+        movies.append(f"{movie['title']} ({movie['release_date']})\nOverview: {movie['overview']}\n")
     if not results:
-        print("No matches found for that combo. Want to loosen the filters or try a different mood?")
+        return "No matches found for that combo. Want to loosen the filters or try a different mood?"
+    return "\n".join(movies)
 
 #params = build_query(mood, language, actor_name, min_rating, movie_type, release_year)
 #get_movies(params)
@@ -113,8 +114,15 @@ def index():
 def filter():
     results = None
     if request.method == "POST":
-        filters = request.form['mood', 'language', 'actor', 'year', 'rating', 'type']
-        results = get_movies(filters)
+        mood = request.form.get('mood')
+        language = request.form.get('language')
+        actor = request.form.get('actor')
+        year = request.form.get('year')
+        rating = request.form.get('rating')
+        movie_type = request.form.get('type')
+
+        params = build_query(mood, language, actor, rating, movie_type, year)
+        results = get_movies(params)
     return render_template('index.html', results=results)
 
 if __name__ == '__main__':
