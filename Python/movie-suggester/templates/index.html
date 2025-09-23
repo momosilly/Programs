@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Movie suggester</title>
+    </head>
+    <body>
+        <h2>Movie suggester</h2>
+        <form action="/filters">
+            <input type="text" name="mood" required>
+            <input type="text" name="language" required>
+            <input type="text" name="actor">
+            <input type="number" name="year">
+            <input type="number" name="rating">
+            <input type="text" name="type">
+            <button type="submit">Check</button>
+        </form>
+        {% if results %}
+        <p>Results: {{ results }}</p>
+        {% endif %}
+    </body>
+</html>

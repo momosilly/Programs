@@ -1,16 +1,19 @@
 import requests
 import os
 from dotenv import load_dotenv
+from flask import Flask, render_template, request
+
+app = Flask(__name__)
 
 load_dotenv()
 API_KEY = os.getenv("TMDB_API_KEY")
 
-mood = input("What's your mood? (e.g., happy, sad, adventurous): ").lower()
-language = input("Preferred language? (e.g., en, nl, fr): ").lower()
-actor_name = input("Favorite actor? (optional): ").strip()
-release_year = input("Preferred release year? (optional): ").strip()
-min_rating = input("Preferred minimum rating: ")
-movie_type = input("What type of movie do you want? (e.g., anime, documentary, sci-fi): ").lower()
+#mood = input("What's your mood? (e.g., happy, sad, adventurous): ").lower()
+#language = input("Preferred language? (e.g., en, nl, fr): ").lower()
+#actor_name = input("Favorite actor? (optional): ").strip()
+#release_year = input("Preferred release year? (optional): ").strip()
+#min_rating = input("Preferred minimum rating: ")
+#movie_type = input("What type of movie do you want? (e.g., anime, documentary, sci-fi): ").lower()
 
 mood_to_genre = {
     "happy": ["comedy", "romance", "animation", "music"],
@@ -100,5 +103,19 @@ def get_movies(params):
     if not results:
         print("No matches found for that combo. Want to loosen the filters or try a different mood?")
 
-params = build_query(mood, language, actor_name, min_rating, movie_type, release_year)
-get_movies(params)
+#params = build_query(mood, language, actor_name, min_rating, movie_type, release_year)
+#get_movies(params)
+
+@app.route("/", methods=["GET"])
+def index():
+    return render_template("index.html")
+@app.route("/filters", methods=["POST"])
+def filter():
+    results = None
+    if request.method == "POST":
+        filters = request.form['mood', 'language', 'actor', 'year', 'rating', 'type']
+        results = get_movies(filters)
+    return render_template('index.html', results=results)
+
+if __name__ == '__main__':
+    app.run(debug=True)
