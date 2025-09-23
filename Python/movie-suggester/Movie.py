@@ -8,7 +8,7 @@ API_KEY = os.getenv("TMDB_API_KEY")
 mood = input("What's your mood? (e.g., happy, sad, adventurous): ").lower()
 language = input("Preferred language? (e.g., en, nl, fr): ").lower()
 actor_name = input("Favorite actor? (optional): ").strip()
-year = input("Preferred release year? (optional): ").strip()
+release_year = input("Preferred release year? (optional): ").strip()
 min_rating = input("Preferred minimum rating: ")
 movie_type = input("What type of movie do you want? (e.g., anime, documentary, sci-fi): ").lower()
 
@@ -46,9 +46,6 @@ def get_genre_ids():
     genres = response.json()["genres"]
     return {genre["name"].lower(): genre["id"] for genre in genres}
 
-#genre_ids = get_genre_ids()
-#print(genre_ids)
-
 def get_actor_id(name):
     if not name: 
         return None
@@ -61,10 +58,10 @@ def get_actor_id(name):
 def format_language_code(code):
     return f"{code}-US" if code else "en-US"
 
-def build_query(mood, language, actor_name, min_rating, movie_type):
+def build_query(mood, language, actor_name, min_rating, movie_type, release_year=None):
     genre_ids_map = get_genre_ids()
     genres = mood_to_genre.get(mood, [])
-    genre_ids = [str(genre_ids_map[g]) for g in genres if g in genre_ids_map] #!
+    genre_ids = [str(genre_ids_map[g]) for g in genres if g in genre_ids_map] 
 
     type_filter = movie_type_filters.get(movie_type.lower())
     if type_filter:
@@ -84,7 +81,8 @@ def build_query(mood, language, actor_name, min_rating, movie_type):
         "sort_by": "popularity.desc",
         "page": 1
     }
-
+    if release_year:
+        params["primary_release_year"] = release_year
     if actor_id:
         params["with_cast"] = actor_id
     if min_rating:
@@ -102,5 +100,5 @@ def get_movies(params):
     if not results:
         print("No matches found for that combo. Want to loosen the filters or try a different mood?")
 
-params = build_query(mood, language, actor_name, min_rating, movie_type)
+params = build_query(mood, language, actor_name, min_rating, movie_type, release_year)
 get_movies(params)
