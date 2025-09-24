@@ -66,7 +66,7 @@ def build_query(mood, language, actor_name, min_rating, movie_type, release_year
     genres = mood_to_genre.get(mood, [])
     genre_ids = [str(genre_ids_map[g]) for g in genres if g in genre_ids_map] 
 
-    type_filter = movie_type_filters.get(movie_type.lower())
+    type_filter = movie_type_filters.get(movie_type)
     if type_filter:
         if "genre" in type_filter:
             genre_ids.append(type_filter["genre"])
@@ -78,7 +78,7 @@ def build_query(mood, language, actor_name, min_rating, movie_type, release_year
 
     params = {
         "api_key": API_KEY,
-        "with_genres": "|".join(genre_ids),
+        "with_genres": ",".join(genre_ids),
         "language": lang_code,
         "with_original_language": "en",
         "sort_by": "popularity.desc",
@@ -114,9 +114,6 @@ def get_movies(params):
         return "No matches found for that combo. Want to loosen the filters or try a different mood?"
     return movies
 
-#params = build_query(mood, language, actor_name, min_rating, movie_type, release_year)
-#get_movies(params)
-
 @app.route("/", methods=["GET"])
 def index():
     return render_template("index.html")
@@ -130,10 +127,16 @@ def filter():
         year = request.form.get('year')
         rating = request.form.get('rating')
         movie_type = request.form.get('type')
+        try:
+            page = int(request.form.get('page', 1) or 1)
+        except ValueError:
+            page = 1
 
+        
         params = build_query(mood, language, actor, rating, movie_type, year)
+        params['page'] = page
         results = get_movies(params)
-    return render_template('index.html', results=results)
+    return render_template('index.html', results=results, page=page)
 
 if __name__ == '__main__':
     app.run(debug=True)

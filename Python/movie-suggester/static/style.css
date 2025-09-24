@@ -45,6 +45,9 @@ input[type=number] {
     pointer-events: none;
     background-color: white;
 }
+span {
+    font-size: 0.75em;
+}
 .lang {
     position: absolute;
     top: 33px;
@@ -124,4 +127,33 @@ option {
     color: #333;
     background-color: #fff;
     font-size: 14px;
+}
+.movie-card {
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    flex-direction: column;
+}
+img {
+    max-width: 100%;
+    height: auto;
+    margin: 20px 0px;
+    margin-top: 50px;
+}
+p {
+    font-size: 1.1em;
+    margin: 0 100px;
+}
+h3 {
+    font-size: 1.5em;
+}
+hr {
+    border: none;
+    border-top: 2px solid #959595;
+    margin: 20px 0;
+    width: 85%;
+    align-self: center;
+}
+#next-btn {
+    display: none;
 }

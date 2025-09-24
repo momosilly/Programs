@@ -39,9 +39,10 @@
                     <label for="" class="labels  year">What's your preffered release year <span>(optional)</span></label>
                 </div>
                 <div class="input-group">
-                    <input type="number" name="rating" class="inputs ratingin" placeholder="">
+                    <input type="number" name="rating" class="inputs ratingin" step="0.1" min="0" max="10" placeholder="">
                     <label for="" class="labels  rating">What's the preffered minimum rating <span>(optional)</span></label>
                 </div>
+                <input type="hidden" name="page" id="page" value="{{ page }}">
                 <br>
                 <label for="type">Choose a movie type:</label>
              <select name="type" id="type">
@@ -58,22 +59,51 @@
              </select>
              <br>
              <br>
-             <button type="submit">Check</button>
+             <button type="submit" id="check">Check</button>
+            <button type="button" id="next-btn">Next Results</button>
         </form>
         {% if results %}
-            {% if results is string %}
-                <p>{{ results }}</p>  <!-- fallback message from Python -->
-            {% else %}
-                {% for movie in results %}
-                    <div class="movie-card">
+            <div id="results">
+                {% if results is string %}
+                    <p>{{ results }}</p>  <!-- fallback message from Python -->
+                {% else %}
+                    {% for movie in results %}
+                        <div class="movie-card">
                         <img src="{{ movie.poster_url }}" alt="{{ movie.title }} poster">
                         <h3>{{ movie.title }} ({{ movie.release_date }})</h3>
                         <p>{{ movie.overview }}</p>
-                    </div>
-                {% endfor %}
-            {% endif %}
+                        <br>
+                        <hr>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
         {% endif %}
-
         </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const nextBtn = document.getElementById('next-btn');
+                const checkBtn = document.getElementById('check');
+                const pageInput = document.getElementById('page');
+                const resultsExist = document.getElementById('results') !== null;
+
+                // Show/hide button based on results and localStorage flag
+                if (resultsExist && localStorage.getItem('showNextBtn') === 'true') {
+                    nextBtn.style.display = 'inline-block';
+                } else {
+                    nextBtn.style.display = 'none';
+                    localStorage.removeItem('showNextBtn'); // reset if no results
+                }
+                // When "Check" is clicked, set flag to show button next time
+                checkBtn.addEventListener('click', function () {
+                    localStorage.setItem('showNextBtn', 'true');
+                });
+                // When "Next Results" is clicked, increment page and submit
+                nextBtn.addEventListener('click', function () {
+                    pageInput.value = parseInt(pageInput.value) + 1;
+                    document.querySelector('form').submit();
+                });
+            });
+        </script>
     </body>
 </html>
