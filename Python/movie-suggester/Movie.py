@@ -132,7 +132,6 @@ def filter():
         except ValueError:
             page = 1
 
-        
         params = build_query(mood, language, actor, rating, movie_type, year)
         params['page'] = page
         results = get_movies(params)
