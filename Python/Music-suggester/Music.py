@@ -23,6 +23,7 @@ def login():
 
 @app.route("/callback")
 def callback():
+    global access_token
     code = request.args.get("code")
 
     token_url = "https://accounts.spotify.com/api/token"
@@ -43,9 +44,26 @@ def callback():
 
     return f"<pre>{test.json()}</pre>"
 
-app.route("/test")
-def test():
-    return "Flask is working"
+@app.route("/top-tracks")
+def top_tracks():
+    headers = {"Authorization": f"Bearer {access_token}"}
+    params = {
+        "limit": 10,
+        "time_range": "short_term"
+    }
+
+    response = requests.get("https://api.spotify.com/v1/me/top/tracks", headers=headers, params=params)
+    data = response.json()
+
+    #Display track names and artists
+
+    output = ""
+    print("Top tracks response:", data)
+    for track in data.get("items", []):
+        name = track["name"]
+        artist = track["artists"][0]["name"]
+        output += f"{name} by {artist}\n"
+    return f"<pre>{output}</pre>"
 
 if __name__ == "__main__":
     app.run(port=5000)
