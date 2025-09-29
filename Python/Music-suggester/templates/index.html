@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Music recommender</title>
+        <meta charset="utf-8">
+    </head>
+    <body>
+        <h1>Upload a track to get recommendations</h1>
+        <form method="post" enctype="multipart/form-data">
+            <input type="file" name="track" required>
+            <button type="submit">Submit</button>
+        </form>
+
+        {% if matches %}
+        <h2>Top Matches:</h2>
+        <ul>
+            {% for name, score in matches %}
+                <li>{{ name }} - Score: {{ score }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    </body>
+</html>
