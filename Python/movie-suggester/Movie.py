@@ -47,6 +47,7 @@ def get_genre_ids():
     params = {"api_key": API_KEY, "language": "en-US"}
     response = requests.get(url, params=params)
     genres = response.json()["genres"]
+    print({genre["name"].lower(): genre["id"] for genre in genres})
     return {genre["name"].lower(): genre["id"] for genre in genres}
 
 def get_actor_id(name):
