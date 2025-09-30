@@ -14,8 +14,8 @@
         {% if matches %}
         <h2>Top Matches:</h2>
         <ul>
-            {% for name, score in matches %}
-                <li>{{ name }} - Score: {{ score }}</li>
+            {% for name, score, artist in matches %}
+                <li>{{ name }} by {{ artist }} - Score: {{ score }}</li>
             {% endfor %}
         </ul>
         {% endif %}
