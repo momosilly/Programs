@@ -8,15 +8,20 @@ app = Flask(__name__)
 load_dotenv()
 API_KEY = os.getenv("WEATHER_API")
 
-#city = input("Which city? ")
-
-def rain():
-    params = {"key": API_KEY, "q": f"Paris"}
+def temp(city):
     url = "http://api.weatherapi.com/v1/current.json"
+    params = {"key": API_KEY, "q": city}
     response = requests.get(url, params=params)
     weather = response.json()
-    print(weather)
     print(weather['current']['temp_c'])
+    temp = int(round(weather['current']['temp_c']))
+    return temp
+
+def rain(city):
+    url = "http://api.weatherapi.com/v1/current.json"
+    params = {"key": API_KEY, "q": city}
+    response = requests.get(url, params=params)
+    weather = response.json()
 
     def_umbrella = [1186, 1189, 1192, 1195, 1243, 1246, 1276]
     maybe_umbrella = [1150, 1153, 1180, 1183, 1240, 1273]
@@ -31,10 +36,8 @@ def rain():
     else:
         return "No umbrella needed"
 
-print(rain())
-
-def feelslike():
-    params = {"key": API_KEY, "q": "Paris"}
+def feelslike(city):
+    params = {"key": API_KEY, "q": city}
     url = "http://api.weatherapi.com/v1/current.json"
     response = requests.get(url, params=params)
     weather = response.json()
@@ -57,10 +60,10 @@ def feelslike():
     else:
         return "Tank tops, shorts, sun protection (hat, sunglasses)"
 
-print(feelslike())
+#print(feelslike())
 
-def cycling_difficulty():
-    params = {"key": API_KEY, "q": "Paris"}
+def cycling_difficulty(city):
+    params = {"key": API_KEY, "q": city}
     url = "http://api.weatherapi.com/v1/current.json"
     response = requests.get(url, params=params)
     weather = response.json()
@@ -78,10 +81,10 @@ def cycling_difficulty():
         return "Very hard — only for experienced cyclists, risk of instability"
     else:
         return "Extreme — unsafe for cycling, consider postponing"
-print(cycling_difficulty())
+#print(cycling_difficulty())
 
-def alerts():
-    params = {"key": API_KEY, "q": "Paris"}
+def alerts(city):
+    params = {"key": API_KEY, "q": city}
     url = "http://api.weatherapi.com/v1//alerts.json"
     response = requests.get(url, params=params)
     alerts = response.json()
@@ -99,8 +102,30 @@ def alerts():
     else:
         pass
 
-alerts()
+#alerts()
 
-@app.route("/")
+@app.route("/", methods=["GET", "POST"])
 def index():
-    pass
+    # defaults
+    tempdef = raindef = feelslikedef = cycling_difficultydef = alertsdef = ""
+    city = "Paris"  # default city
+
+    if request.method == "POST":
+        city = request.form.get('city', 'Paris')
+        tempdef = temp(city)
+        raindef = rain(city)
+        feelslikedef = feelslike(city)
+        cycling_difficultydef = cycling_difficulty(city)
+        alertsdef = alerts(city)
+
+    return render_template(
+        "index.html",
+        tempdef=tempdef, 
+        raindef=raindef, 
+        feelslikedef=feelslikedef, 
+        cycling_difficultydef=cycling_difficultydef, 
+        alertsdef=alertsdef
+    )
+
+if __name__ == '__main__':
+    app.run(debug=True)

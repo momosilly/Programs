@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Weather</title>
+        <link rel="stylesheet" href="{{url_for('static', filename='style.css')}}">
+    </head>
+    <body>
+        <div id="main">
+            <form method="post">
+                <div id="inputGroup">
+                    <input type="text" name="city" placeholder="">
+                    <label>Enter city name</label>
+                </div>
+                <br>
+                <button type="submit">Check</button>
+            </form>
+        </div>
+        <p class="para temp">{{ tempdef }}</p>
+        <p class="para rain">{{ raindef }}</p>
+        <p class="para feel">{{ feelslikedef }}</p>
+        <p>{{cycling_difficultydef}}</p>
+        {% if alertsdef %}
+            <p class="para alert">{{ alertsdef }}</p>
+        {% endif %}
+    </body>
+</html>
