@@ -15,13 +15,95 @@
                 <button type="submit">Check</button>
             </form>
         </div>
-        <p class="para temp">{{ tempdef }}</p>
-        <p class="para location">{{ locationdef }}</p>
-        <p class="para rain">{{ raindef }}</p>
-        <p class="para feel">{{ feelslikedef }}</p>
-        <p>{{cycling_difficultydef}}</p>
-        {% if alertsdef %}
-            <p class="para alert">{{ alertsdef }}</p>
+        {% if tempdef or locationdef or raindef or feelslikedef or cycling_difficultydef or alertsdef %}
+            <div class="tile temp">
+                {% if tempdef %}
+                    <img id="weather-icon" src="{{ tempdef.icon_url }}" alt="icon">
+                    <p class="para temp">{{ tempdef.temp }}</p>
+                    <p>{{ tempdef.condition}}</p>
+                {% endif %}
+                {% if locationdef %}<p class="para location">{{ locationdef }}</p>{% endif %}
+            </div>
+            {% if raindef %}
+            <div class="tile rain">
+                <p class="para rainpara">{{ raindef }}</p>
+            </div>
+            {% endif %}
+            {% if feelslikedef %}
+            <div class="tile feel">
+                <p class="para feelpara">{{ feelslikedef }}</p>
+            </div>
+            {% endif %}
+            {% if cycling_difficultydef %}
+            <div class="tile cycling">
+                <p class="para cyclingpara">{{ cycling_difficultydef }}</p>
+            </div>
+            {% endif %}
+            {% if alertsdef %}
+            <div class="tile alert">
+                {% for alert in alertsdef %}
+                <p>
+                <strong>{{ alert.event }}</strong><br>
+                Severity: {{ alert.severity }}<br>
+                Certainty: {{ alert.certainty }}<br>
+                Areas: {{ alert.areas }}<br>
+                Starts: {{ alert.effective }}<br>
+                Ends: {{ alert.expires }}
+                </p>
+                {% endfor %}
+            </div>
+            {% endif %}
         {% endif %}
+        <script>
+            const temp = {{ tempdef|tojson }};
+            const weatherCode = temp.code;
+            const tiles = document.getElementsByClassName("tile");
+            const iconURL = "{{ tempdef.icon_url }}";
+            const isday = temp.isday;
+            document.getElementById("weather-icon").src = iconURL;
+
+            let bgGradient = "linear-gradient(to bottom, #56a8ff, #a3d8ff)"; // default: mild blue
+
+            if (weatherCode !== null) {
+                // ☀️ Sunny / Clear
+                const sunnyCodes = [1000];
+    
+                // ☁️ Cloudy / Overcast / Mist / Fog
+                const cloudyCodes = [1003, 1006, 1009, 1030, 1135, 1147];
+    
+                // 🌧️ Rain / Drizzle / Showers
+                const rainCodes = [
+                    1063, 1150, 1153, 1168, 1171, 1180, 1183, 1186, 1189, 1192, 1195,
+                    1198, 1201, 1240, 1243, 1246, 1273, 1276
+                ];
+    
+                // ❄️ Snow / Sleet / Ice
+                const snowCodes = [
+                    1066, 1069, 1072, 1114, 1117, 1204, 1207, 1210, 1213, 1216, 1219,
+                    1222, 1225, 1237, 1249, 1252, 1255, 1258, 1261, 1264, 1279, 1282
+                ];
+    
+                // ⚡ Thunder
+                const thunderCodes = [1087, 1273, 1276, 1279, 1282];
+
+                if (isday == 0) {
+                    bgGradient = "linear-gradient(to bottom, #0f2027, #203a43, #2c5364";
+                } else if (sunnyCodes.includes(weatherCode)) {
+                    bgGradient = "linear-gradient(to bottom, #fcb045, #fd1d1d)";
+                } else if (cloudyCodes.includes(weatherCode)) {
+                    bgGradient = "linear-gradient(to bottom, #a0a0a0, #d3d3d3)";
+                } else if (rainCodes.includes(weatherCode)) {
+                    bgGradient = "linear-gradient(to bottom, #4e54c8, #8f94fb)";
+                } else if (snowCodes.includes(weatherCode)) {
+                    bgGradient = "linear-gradient(to bottom, #e0eafc, #cfdef3)";
+                } else if (thunderCodes.includes(weatherCode)) {
+                    bgGradient = "linear-gradient(to bottom, #373b44, #4286f4)";
+                }
+
+                for (let i = 0; i < tiles.length; i++) {
+                    tiles[i].style.backgroundImage = bgGradient;
+                }
+            }
+        </script>
     </body>
 </html>

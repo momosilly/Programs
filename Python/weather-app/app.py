@@ -13,9 +13,12 @@ def temp(city):
     params = {"key": API_KEY, "q": city}
     response = requests.get(url, params=params)
     data = response.json()
-    print(data['current']['temp_c'])
-    temp = int(round(data['current']['temp_c']))
-    return temp
+    temp_c = int(round(data['current']['temp_c']))
+    condition_text = data['current']['condition']['text']
+    icon_url = "https:" + data['current']['condition']['icon']
+    code = data['current']['condition']['code']
+    is_day = data['current']['is_day']
+    return {"temp": temp_c, "condition": condition_text, "icon_url": icon_url, "code": code, "isday": is_day}
 
 def location(city):
     url = "http://api.weatherapi.com/v1/current.json"
@@ -99,23 +102,32 @@ def alerts(city):
 
     alerts_list = alerts.get('alerts', {}).get('alert', [])
 
+    result = []
     if alerts_list:
         for alert in alerts_list:
-            print("Event:", alert.get('event', 'N/A'))
-            print("Severity:", alert.get('severity', 'N/A'))
-            print("Certainty:", alert.get('certainty', 'N/A'))
-            print("Areas affected:", alert.get('areas', 'N/A'))
-            print("Starts on:", alert.get('effective', 'N/A'))
-            print("Ends on:", alert.get('expires', 'N/A'))
+            result.append({
+                "event": alert.get('event', 'N/A'),
+                "severity": alert.get('severity', 'N/A'),
+                "certainty": alert.get('certainty', 'N/A'),
+                "areas": alert.get('areas', 'N/A'),
+                "effective": alert.get('effective', 'N/A'),
+                "expires": alert.get('expires', 'N/A')
+            })
     else:
         pass
+    return result
 
 #alerts()
 
 @app.route("/", methods=["GET", "POST"])
 def index():
     # defaults
-    tempdef = locationdef = raindef = feelslikedef = cycling_difficultydef = alertsdef = ""
+    tempdef = None 
+    locationdef = None 
+    raindef = None 
+    feelslikedef = None 
+    cycling_difficultydef = None
+    alertsdef = None
     city = "Paris"  # default city
 
     if request.method == "POST":

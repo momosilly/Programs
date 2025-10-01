@@ -1,5 +1,6 @@
 body, html {
     font-family: Arial, Helvetica, sans-serif;
+    height: 99%;
 }
 #main {
     display: flex;
@@ -59,4 +60,14 @@ label {
     top: 38px;
     left: 170px;
     
+}
+.tile {
+    border-radius: 10px;
+    background-color: #56a8ff;
+    color: white;
+    outline: none;
+    width: 20%;
+    height: 25%;
+    margin: 20px 0px;
+    padding: 10px;
 }
