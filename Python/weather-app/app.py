@@ -12,26 +12,34 @@ def temp(city):
     url = "http://api.weatherapi.com/v1/current.json"
     params = {"key": API_KEY, "q": city}
     response = requests.get(url, params=params)
-    weather = response.json()
-    print(weather['current']['temp_c'])
-    temp = int(round(weather['current']['temp_c']))
+    data = response.json()
+    print(data['current']['temp_c'])
+    temp = int(round(data['current']['temp_c']))
     return temp
+
+def location(city):
+    url = "http://api.weatherapi.com/v1/current.json"
+    params = {"key": API_KEY, "q": city}
+    response = requests.get(url, params=params)
+    data = response.json()
+    city_name = data['location']['name']
+    return city_name
 
 def rain(city):
     url = "http://api.weatherapi.com/v1/current.json"
     params = {"key": API_KEY, "q": city}
     response = requests.get(url, params=params)
-    weather = response.json()
+    data = response.json()
 
     def_umbrella = [1186, 1189, 1192, 1195, 1243, 1246, 1276]
     maybe_umbrella = [1150, 1153, 1180, 1183, 1240, 1273]
     no_umbrella = [1063]
 
-    if weather['current']['condition']['code'] in def_umbrella:
+    if data['current']['condition']['code'] in def_umbrella:
         return "You NEED an umbrella and rain jacket"
-    elif weather['current']['condition']['code'] in maybe_umbrella:
+    elif data['current']['condition']['code'] in maybe_umbrella:
         return "Consider getting an umbrella"
-    elif weather['current']['condition']['code'] in no_umbrella:
+    elif data['current']['condition']['code'] in no_umbrella:
         return "No need for umbrella"
     else:
         return "No umbrella needed"
@@ -40,8 +48,8 @@ def feelslike(city):
     params = {"key": API_KEY, "q": city}
     url = "http://api.weatherapi.com/v1/current.json"
     response = requests.get(url, params=params)
-    weather = response.json()
-    feels_like = weather['current']['feelslike_c']
+    data = response.json()
+    feels_like = data['current']['feelslike_c']
 
     if feels_like <= -10:
         return "Heavy winter coat, thermal layers, gloves, hat, scarf"
@@ -66,8 +74,8 @@ def cycling_difficulty(city):
     params = {"key": API_KEY, "q": city}
     url = "http://api.weatherapi.com/v1/current.json"
     response = requests.get(url, params=params)
-    weather = response.json()
-    wind_kph = weather['current']['wind_kph']
+    data = response.json()
+    wind_kph = data['current']['wind_kph']
 
     if wind_kph <= 10:
         return "Easy ride — minimal wind resistance"
@@ -107,12 +115,13 @@ def alerts(city):
 @app.route("/", methods=["GET", "POST"])
 def index():
     # defaults
-    tempdef = raindef = feelslikedef = cycling_difficultydef = alertsdef = ""
+    tempdef = locationdef = raindef = feelslikedef = cycling_difficultydef = alertsdef = ""
     city = "Paris"  # default city
 
     if request.method == "POST":
         city = request.form.get('city', 'Paris')
         tempdef = temp(city)
+        locationdef = location(city)
         raindef = rain(city)
         feelslikedef = feelslike(city)
         cycling_difficultydef = cycling_difficulty(city)
@@ -120,7 +129,8 @@ def index():
 
     return render_template(
         "index.html",
-        tempdef=tempdef, 
+        tempdef=tempdef,
+        locationdef = locationdef,
         raindef=raindef, 
         feelslikedef=feelslikedef, 
         cycling_difficultydef=cycling_difficultydef, 
