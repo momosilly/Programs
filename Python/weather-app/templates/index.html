@@ -16,7 +16,7 @@
             </form>
         </div>
         {% if tempdef or locationdef or raindef or feelslikedef or cycling_difficultydef or alertsdef %}
-            <div class="tile temp">
+            <div class="tile tempdiv">
                 {% if tempdef %}
                     <img id="weather-icon" src="{{ tempdef.icon_url }}" alt="icon">
                     <p class="para temp">{{ tempdef.temp }}</p>
@@ -27,16 +27,19 @@
             {% if raindef %}
             <div class="tile rain">
                 <p class="para rainpara">{{ raindef }}</p>
+                <img src="" alt="Umbrella" id="umbrella" height="64px" width="64px">
             </div>
             {% endif %}
             {% if feelslikedef %}
             <div class="tile feel">
-                <p class="para feelpara">{{ feelslikedef }}</p>
+                <p class="para feelpara">{{ feelslikedef.advice }}</p>
+                <img src="" alt="Clothing advie" id="cloth" height="84px" width="84px">
             </div>
             {% endif %}
             {% if cycling_difficultydef %}
             <div class="tile cycling">
-                <p class="para cyclingpara">{{ cycling_difficultydef }}</p>
+                <p class="para cyclingpara">{{ cycling_difficultydef.cycle }}</p>
+                <img src="" alt="bicycle" id="bicycle" height="84px" width="84px">
             </div>
             {% endif %}
             {% if alertsdef %}
@@ -56,10 +59,18 @@
         {% endif %}
         <script>
             const temp = {{ tempdef|tojson }};
+            const feel = {{ feelslikedef|tojson }};
+            const cycling = {{ cycling_difficultydef|tojson }};
+            const windData = cycling.wind;
+            const feelData = feel.feelslike;
             const weatherCode = temp.code;
             const tiles = document.getElementsByClassName("tile");
+            const clothImg = document.getElementById("cloth");
+            const cycleImg = document.getElementById("bicycle");
             const iconURL = "{{ tempdef.icon_url }}";
+            const umbIcon = "/static/umbrella.png";
             const isday = temp.isday;
+            document.getElementById("umbrella").style.display = "none";
             document.getElementById("weather-icon").src = iconURL;
 
             let bgGradient = "linear-gradient(to bottom, #56a8ff, #a3d8ff)"; // default: mild blue
@@ -94,6 +105,8 @@
                     bgGradient = "linear-gradient(to bottom, #a0a0a0, #d3d3d3)";
                 } else if (rainCodes.includes(weatherCode)) {
                     bgGradient = "linear-gradient(to bottom, #4e54c8, #8f94fb)";
+                    document.getElementById("umbrella").style.display = "block";
+                    document.getElementById("umbrella").src = umbIcon
                 } else if (snowCodes.includes(weatherCode)) {
                     bgGradient = "linear-gradient(to bottom, #e0eafc, #cfdef3)";
                 } else if (thunderCodes.includes(weatherCode)) {
@@ -102,6 +115,30 @@
 
                 for (let i = 0; i < tiles.length; i++) {
                     tiles[i].style.backgroundImage = bgGradient;
+                }
+            }
+            if (feelData !== null) {
+                if (feelData <= -10) {
+                    clothImg.src = "static/winter-clothes.png"
+                } else if (feelData <= 0 ) {
+                    clothImg.src = "static/coat.png"
+                } else if (feelData <= 10) {
+                    clothImg.src = "static/coat.png"
+                } else if (feelData <= 15) {
+                    clothImg.src = "static/coat.png"
+                } else if (feelData <= 20) {
+                    clothImg.src = "static/sweater.png"
+                } else if (feelData <= 25) {
+                    clothImg.src = "static/clothing.png"
+                } else if (feelData <= 30) {
+                    clothImg.src = "static/accessory.png"
+                }
+            }
+            if (windData !== null) {
+                if (windData <= 20) {
+                    cycleImg.src = "static/bike.png"
+                } else {
+                    cycleImg.src = "static/wind.png"
                 }
             }
         </script>

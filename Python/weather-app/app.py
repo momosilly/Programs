@@ -35,15 +35,12 @@ def rain(city):
     data = response.json()
 
     def_umbrella = [1186, 1189, 1192, 1195, 1243, 1246, 1276]
-    maybe_umbrella = [1150, 1153, 1180, 1183, 1240, 1273]
-    no_umbrella = [1063]
+    maybe_umbrella = [1150, 1153, 1180, 1183, 1240, 1273, 1063]
 
     if data['current']['condition']['code'] in def_umbrella:
         return "You NEED an umbrella and rain jacket"
     elif data['current']['condition']['code'] in maybe_umbrella:
         return "Consider getting an umbrella"
-    elif data['current']['condition']['code'] in no_umbrella:
-        return "No need for umbrella"
     else:
         return "No umbrella needed"
 
@@ -55,21 +52,23 @@ def feelslike(city):
     feels_like = data['current']['feelslike_c']
 
     if feels_like <= -10:
-        return "Heavy winter coat, thermal layers, gloves, hat, scarf"
+        advice = "Heavy winter coat, thermal layers, gloves, hat, scarf"
     elif feels_like <= 0:
-        return "Winter coat, sweater, gloves, hat"
+        advice = "Winter coat, sweater, gloves, hat"
     elif feels_like <= 10:
-        return "Jacket or coat, long sleeves, optional scarf"
+        advice = "Jacket or coat, long sleeves, optional scarf"
     elif feels_like <= 15:
-        return "Light jacket or hoodie, jeans or trousers"
+        advice = "Light jacket or hoodie, jeans or trousers"
     elif feels_like <= 20:
-        return "Long sleeves or light sweater, optional jacket"
+        advice = "Long sleeves or light sweater, optional jacket"
     elif feels_like <= 25:
-        return "T-shirt or polo, light pants or shorts"
+        advice = "T-shirt or polo, light pants or shorts"
     elif feels_like <= 30:
-        return "Short sleeves, shorts, breathable fabrics"
+        advice = "Short sleeves, shorts, breathable fabrics"
     else:
-        return "Tank tops, shorts, sun protection (hat, sunglasses)"
+        advice = "Shorts, sun protection (hat, sunglasses)"
+    return {"feelslike": feels_like, "advice": advice}
+    
 
 #print(feelslike())
 
@@ -81,18 +80,18 @@ def cycling_difficulty(city):
     wind_kph = data['current']['wind_kph']
 
     if wind_kph <= 10:
-        return "Easy ride — minimal wind resistance"
+        cycle =  "Easy ride — minimal wind resistance"
     elif wind_kph <= 20:
-        return "Moderate — some resistance, manageable for most riders"
+        cycle = "Moderate — some resistance, manageable for most riders"
     elif wind_kph <= 30:
-        return "Challenging — strong headwinds, tiring over long distances"
+        cycle = "Challenging — strong headwinds, tiring over long distances"
     elif wind_kph <= 40:
-        return "Hard — expect significant effort, may need to slow down"
+        cycle = "Hard — expect significant effort, may need to slow down"
     elif wind_kph <= 50:
-        return "Very hard — only for experienced cyclists, risk of instability"
+        cycle = "Very hard — only for experienced cyclists, risk of instability"
     else:
-        return "Extreme — unsafe for cycling, consider postponing"
-#print(cycling_difficulty())
+        cycle = "Extreme — unsafe for cycling, consider postponing"
+    return {"cycle": cycle, "wind": wind_kph}
 
 def alerts(city):
     params = {"key": API_KEY, "q": city}
