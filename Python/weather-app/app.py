@@ -68,9 +68,6 @@ def feelslike(city):
     else:
         advice = "Shorts, sun protection (hat, sunglasses)"
     return {"feelslike": feels_like, "advice": advice}
-    
-
-#print(feelslike())
 
 def cycling_difficulty(city):
     params = {"key": API_KEY, "q": city}

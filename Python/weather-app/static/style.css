@@ -65,7 +65,7 @@ label {
     background-color: #56a8ff;
     color: white;
     width: 50%;
-    height: 25%;
+    min-height: 25%;
     margin: 20px auto;
     padding: 1%;
     justify-content: center;
