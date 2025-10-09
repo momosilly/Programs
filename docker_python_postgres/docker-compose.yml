@@ -1,0 +1,29 @@
+services:
+  db:
+    image: postgres:17-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "secret!"
+      POSTGRES_DB: "default_db"
+    volumes:
+      - ./db_data:/var/lib/postgresql/data
+      - ./db_init/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+
+  app:
+    build: .
+    depends_on:
+      - db
+    tty: true
+    volumes:
+      - ./app:/app
+
+  adminer:
+    image: adminer:latest
+    container_name: adminer
+    ports:
+      - "8083:8080"
+    depends_on:
+      - db

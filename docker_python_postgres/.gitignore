@@ -1,0 +1,5 @@
+# .env file
+.env
+/db_data
+/venv
+.DS_Store

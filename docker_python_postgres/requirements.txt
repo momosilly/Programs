@@ -1,0 +1,4 @@
+PyMySQL==1.1.1
+slugify==0.0.1
+sqlparse==0.5.3
+tabulate==0.9.0
