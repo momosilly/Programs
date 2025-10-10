@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+    <head>
+
+    </head>
+    <body>
+        <form method="POST">
+            Name: <input type="text" name="name" required>
+            <input type="submit">
+        </form>
+
+        {% if answers %}
+            <h2>Your Answer(s)</h2>
+            <ul>
+                <p>Aliens (are) </p>
+                {% for answer in answers %}
+                    {% for item in answer[1:] %}
+                        <li>{{ item }}</li>
+                    {% endfor %}
+                {% endfor %}
+            </ul>
+        {% elif answers is not none %}
+            <p>No answer found for this name</p>
+        {% endif %}
+    </body>
+</html>
