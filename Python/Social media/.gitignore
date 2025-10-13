@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual environments
+venv/
+env/
+
+# Flask / project config
+*.ini
+*.env
+
+# Uploads
+static/uploads/
+
+# Optional: database files if using SQLite
+*.db
