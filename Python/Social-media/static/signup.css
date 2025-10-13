@@ -1,0 +1,27 @@
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    max-width: 400px;
+    margin: 50px auto;
+}
+form {
+    display: flex;
+    flex-direction: column;
+}
+input {
+    padding: 8px;
+    margin: 5px 0;
+}
+button {
+    padding: 10px;
+    margin-top: 10px;
+    background-color: #2c7be5;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+button:hover {
+    background-color: #1a5bb8;
+}
+.flash {
+    color: red;
+}
