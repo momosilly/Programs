@@ -145,7 +145,7 @@ def logout():
     logout_user()
     return redirect(url_for('login'))
 
-@app.route('/profile/<username>') #whats <username>
+@app.route('/profile/<username>')
 @login_required
 def profile(username):
     user = User.query.filter_by(username=username).first_or_404()

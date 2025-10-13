@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Create Post</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='create_post.css') }}">
+    </head>
+    <body>
+        <h1>Create a Post</h1>
+
+        <form action="{{ url_for('create_post') }}" method="POST" enctype="multipart/form-data">
+            <label for="image">Select an Image:</label>
+            <input type="file" name="image" id="image" accept=".png,.jpg,.jpeg,.gif" required>
+
+            <label for="caption">Caption (optional)</label>
+            <textarea name="caption" id="caption" rows="3" placeholder="Write something..."></textarea>
+
+            <button type="submit">Post</button>
+        </form>
+
+        <div class="back-link">
+            <a href="{{ url_for('feed') }}">Back to Feed</a>
+        </div>
+    </body>
+</html>
