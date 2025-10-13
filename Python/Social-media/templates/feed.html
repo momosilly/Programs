@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Feed</title>
+        <link rel="stylesheet" href="{{url_for('static', filename='feed.css')}}">
+    </head>
+    <body>
+        <header>
+            <h1>Feed</h1>
+            <nav>
+                <a href="{{ url_for('create_post') }}">New Post</a> |
+                <a href="{{ url_for('profile', username=current_user.username) }}">Profile</a> |
+                <a href="{{ url_for('logout') }}">Logout</a>
+            </nav>
+        </header>
+
+        {% for post in posts %}
+            <div class="post">
+                <div class="username">{{ post.author.username }}</div>
+                <img src="{{ url_for('static', filename=post.image_path.replace('static/', '')) }}" alt="Post Image">
+                {% if post.caption %}
+                    <div class="caption">{{ post.caption }}</div>
+                {% endif %}
+                <div class="timestamp">{{ post.created_at.strftime('%Y-%m-%d %H:%M') }}</div>
+            </div>
+        {% else %}
+            <p>No posts yet. Be the first to <a href="{{ url_for('create_post') }}">post!</a></p>
+        {% endfor %}
+    </body>
+</html>
