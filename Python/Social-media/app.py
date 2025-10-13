@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from flask_login import LoginManager, login_user, login_required, current_user, logout_user
+from flask_login import LoginManager, login_user, login_required, current_user, logout_user, UserMixin
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
@@ -17,7 +17,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
-class User(db.Model):
+class User(db.Model, UserMixin):
     __tablename__ = 'users'
 
     id = db.Column(db.Integer, primary_key=True)
@@ -72,6 +72,16 @@ def signup():
         email = request.form.get('email')
         password = request.form.get('password')
 
+        existing_email = User.query.filter_by(email=email).first()
+        existing_username = User.query.filter_by(username=username).first()
+
+        if existing_email:
+            flash("An account with this email already exists. Please try another one.")
+            return redirect(url_for('signup'))
+        if existing_username:
+            flash("That username is already take. Try another one.")
+            return redirect(url_for('signup'))
+
         if not is_valid_password(password):
             flash('Password must be at least 8 characters and include letters and numbers')
             return redirect(url_for('signup'))
@@ -98,9 +108,18 @@ def login():
         email = request.form['email']
         password = request.form['password']
         user = User.query.filter_by(email=email).first()
-        if user and user.check_password(password):
+
+        if user is None:
+            flash("No account found with that email.")
+            return redirect(url_for('login'))
+        
+        if user.check_password(password):
             login_user(user)
             return redirect(url_for('feed'))
+        else:
+            flash("Incorrect password. Please try again.")
+            return redirect(url_for('login'))
+        
     return render_template('login.html')
 
 @app.route('/create_post', methods=(['GET', 'POST']))
@@ -117,13 +136,14 @@ def create_post():
             ext = file.filename.rsplit('.', 1)[1].lower()
             unique_filename = f"{uuid.uuid4().hex}.{ext}"
             file_path = os.path.join(user_folder, unique_filename)
+            file_path_db = file_path.replace("\\", "/")
 
             file.save(file_path)
 
             #Save to database
             new_post = Post(
                 user_id=current_user.id,
-                image_path=file_path,
+                image_path=file_path_db,
                 caption=caption
             )
             db.session.add(new_post)
