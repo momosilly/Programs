@@ -22,7 +22,7 @@
                 {% if post.caption %}
                     <div class="caption">{{ post.caption }}</div>
                 {% endif %}
-                <div class="timestamp">{{ post.created_at.strftime('%Y-%m-%d %H:%M') }}</div>
+                <div class="timestamp">{{ post.created_at.strftime('%d-%m-%Y %H:%M') }}</div>
             </div>
         {% else %}
             <p>No posts yet. Be the first to <a href="{{ url_for('create_post') }}">post!</a></p>

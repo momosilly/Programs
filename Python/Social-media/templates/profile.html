@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>{{ user.username }}'s Profile</title>
+    </head>
+    <body>
+        <header>
+            <h1>{{ user.username }}'s Profile</h1>
+            <nav>
+                <a href="{{ url_for('feed') }}">Feed</a> |
+                <a href="{{ url_for('create_post') }}">New Post</a> |
+                <a href="{{ url_for('logout') }}">Logout</a>
+            </nav>
+        </header>
+
+        <div class="Profile-header">
+            <img src="{{ url_for('static', filename=user,profile_pic) }}" alt="Profile picture">
+            <div>
+                <h2>{{ user.username }}</h2>
+                <p>Joined: {{ user.created_at.strftime('%d-%m-%Y') }}</p>
+            </div>
+        </div>
+
+        <h3>Posts</h3>
+
+        {% for post in posts %}
+            <div class="post">
+                <img src="{{ url_for('static', filename=post.image_path.replace('static/', '')) }}" alt="Post image">
+                {% if post.caption %}
+                    <div class="caption">{{ post.caption }}</div>
+                {% endif %}
+                <div class="timestamp">{{ post.created_at.strftime('%d-%m-%Y %H:%M') }}</div>
+            </div>
+        {% else %}
+            <p>No posts yet. <a href="{{ url_for('create_post') }}">Create one!</a></p>
+        {% endfor %}
+    </body>
+</html>
