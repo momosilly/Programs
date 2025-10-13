@@ -61,6 +61,10 @@ def is_valid_password(password):
         return False
     return True
 
+@app.route('/', methods=['GET', 'POST'])
+def index():
+    return render_template("signup.html")
+
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
@@ -147,3 +151,6 @@ def profile(username):
     user = User.query.filter_by(username=username).first_or_404()
     posts = Post.query.filter_by(user_id=user.id).order_by(Post.created_at.desc()).all()
     return render_template('profile.html', user=user, posts=posts)
+
+if __name__ == "__main__":
+    app.run(debug=True)
