@@ -23,3 +23,10 @@ header a {
 .post .caption {
     margin-top: 5px;
 }
+.post {
+    border: 2px #ececec solid;
+    margin: 20px;
+    padding: 15px;
+    background-color: #ececec;
+    border-radius: 7px;
+}

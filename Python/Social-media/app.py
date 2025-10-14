@@ -63,7 +63,7 @@ def is_valid_password(password):
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    return render_template("signup.html")
+    return redirect(url_for('feed'))
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
@@ -96,6 +96,7 @@ def signup():
     return render_template('signup.html')
 
 login_manager = LoginManager()
+login_manager.login_view = 'login'
 login_manager.init_app(app)
 
 @login_manager.user_loader

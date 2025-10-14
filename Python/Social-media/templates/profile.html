@@ -3,6 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <title>{{ user.username }}'s Profile</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='profile.css') }}">
     </head>
     <body>
         <header>
@@ -15,7 +16,7 @@
         </header>
 
         <div class="Profile-header">
-            <img src="{{ url_for('static', filename=user,profile_pic) }}" alt="Profile picture">
+            <img src="{{ url_for('static', filename='profile_pic.jpg') }}" alt="Profile picture" width="80px" height="80px">
             <div>
                 <h2>{{ user.username }}</h2>
                 <p>Joined: {{ user.created_at.strftime('%d-%m-%Y') }}</p>
