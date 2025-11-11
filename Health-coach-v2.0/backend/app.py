@@ -1,10 +1,6 @@
 from flask import Flask, request, jsonify 
 from datetime import datetime 
-import psycopg2 
 import json 
-import schedule 
-import time 
-import threading 
 from dotenv import load_dotenv 
 import os 
 from google import genai 
