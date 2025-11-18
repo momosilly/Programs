@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Menu</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='menu.css') }}">
+    </head>
+    <body>
+        <div id="anchors">
+            <a href="{{ url_for('user.login') }}">Login</a>
+            <a href="{{ url_for('user.signup') }}">Signup</a>
+            <div id="button-wrapper">
+                <button id="basket-toggle">
+                    <img src="{{ url_for('static', filename='icons/cart.png') }}" alt="Shopping cart">
+                </button>
+            </div>
+        </div>
+        <div id="basket-sidebar">
+            <button id="basket-close">
+                <img src="{{ url_for('static', filename='icons/x-mark.png') }}" alt="Close">
+            </button>
+            {% set ns = namespace(total=0) %}
+            <h2>Your basket</h2>
+            {% for item in basket_items %}
+                {% set ns.total = ns.total + (item.price * item.quantity) %}
+                <div class="basket-item">
+                    <p>{{ item.quantity }} {{ item.name }} <span class="item-price">€{{ item.price }}</span></p>
+                    <form action="{{ url_for('increase_quantity', item_id=item.id) }}" method="post">
+                        <button type="submit">+</button>
+                    </form>
+                    <form action="{{ url_for('decrease_quantity', item_id=item.id) }}" method="post">
+                        <button type="submit">-</button>
+                    </form>
+                </div>
+            {% endfor %}
+            <p><strong>Total: €{{ ns.total }}</strong></p>
+            <form action="{{ url_for('checkout') }}" method="post">
+                <button type="submit" id="checkout">Checkout</button>
+            </form>
+        </div>
+        <h1>Menu</h1>
+        <nav class="menu-nav">
+            <a href="#food">Food</a>
+            <a href="#drinks"> Drinks</a>
+            <a href="#dessert">Dessert</a>
+        </nav>
+
+        <h2 id="food">Food</h2>
+        <div class="menu-section">
+            {% for item in items if item.category == 'food' %}
+                <div class="menu-item">
+                    <h2>{{ item.name }}</h2>
+                    <img src="{{ url_for('static', filename=item.image_url.split('static/')[-1]) }}" alt="{{ item.image }}" height="228" width="234">
+                    <p>{{ item.description }}</p>
+                    <p>€{{ item.price }}</p>
+                    <form action="{{ url_for('add_to_basket', item_id=item.id) }}" method="post">
+                        <button type="submit" class="basket-button">
+                            <img src="{{ url_for('static', filename='icons/add-to-cart.png') }}" alt="Add to basket" height="24" width="24" />
+                        </button>
+                    </form>
+                </div>
+            {% endfor %}
+        </div>
+
+        <h2 id="drinks">Drinks</h2>
+        <div class="menu-section">
+            {% for item in items if item.category == 'drinks' %}
+                <div class="menu-item">
+                    <h2>{{ item.name }}</h2>
+                    <img src="{{ url_for('static', filename=item.image_url.split('static/')[-1]) }}" alt="{{ item.image }}" >
+                    <p>{{ item.description }}</p>
+                    <p>€{{ item.price }}</p>
+                    <form action="{{ url_for('add_to_basket', item_id=item.id) }}" method="post">
+                        <button type="submit" class="basket-button">
+                            <img src="{{ url_for('static', filename='icons/add-to-cart.png') }}" alt="Add to basket" height="24" width="24" />
+                        </button>
+                    </form>
+                </div>
+            {% endfor %}
+        </div>
+
+        <h2 id="dessert">Dessert</h2>
+        <div class="menu-section">
+            {% for item in items if item.category == 'dessert' %}
+                <div class="menu-item">
+                    <h2>{{ item.name }}</h2>
+                    <img src="{{ url_for('static', filename=item.image_url.split('static/')[-1]) }}" alt="{{ item.name }}" height="228" width="234">
+                    <p>{{ item.description }}</p>
+                    <p>€{{ item.price }}</p>
+                    <form action="{{ url_for('add_to_basket', item_id=item.id) }}" method="post">
+                        <button type="submit" class="basket-button">
+                            <img src="{{ url_for('static', filename='icons/add-to-cart.png') }}" alt="Add to basket" height="24" width="24" />
+                        </button>
+                    </form>
+                </div>
+            {% endfor %}
+        </div>
+        <script>
+            document.getElementById('basket-toggle').addEventListener('click', function() {
+                document.getElementById('basket-sidebar').classList.toggle('open');
+            });
+
+            document.getElementById('basket-close').addEventListener('click', function() {
+                document.getElementById('basket-sidebar').classList.remove('open');
+            });
+        </script>
+    </body>
+</html>

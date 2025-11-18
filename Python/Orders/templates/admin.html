@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Admin</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='admin.css') }}">
+    </head>
+    <body>
+        <h2>Add new menu item</h2>
+        <form action="{{ url_for('admin.add_item') }}" method="post" enctype="multipart/form-data">
+            <input type="text" name="name" placeholder="Item name" required>
+            <input type="text" name="description" placeholder="Description">
+            <input type="number" step="0.01" name="price" placeholder="Price" required>
+            <input type="file" name="image" id="image" accept=".png,.jpg,.jpeg" required>
+            <select name="category" id="category" required>
+                <option value=""  disabled selected>Select a category</option>
+                <option value="food">Food</option>
+                <option value="drinks">Drinks</option>
+                <option value="dessert">Dessert</option>
+            </select>
+            <button type="submit">Add Item</button>
+        </form>
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="flash">
+                    {% for msg in messages %}
+                        <p>{{ msg }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <h2>Search Items</h2>
+        <form method="GET" action="{{ url_for('admin.dashboard') }}">
+            <input type="text" name="query" placeholder="Search by name" required>
+            <button type="submit">Search</button>
+        </form>
+        {% if query %}
+            <h2>Matching Items{% if query %} for "{{ query }}"{% endif %}</h2>
+            {% for item in items %}
+                <div class="menu-item">
+                    <p>ID: {{ item.id }} | Name: {{ item.name }} | Price: €{{ item.price }}</p>
+
+                    <form action="{{ url_for('admin.edit_item', item_id=item.id) }}" method="POST" enctype="multipart/form-data">
+                        <input type="text" name="name" value="{{ item.name }}" required>
+                        <input type="text" name="description" value="{{ item.description }}">
+                        <input type="number" step="0.01" name="price" value="{{ item.price }}" required>
+                        <select name="category">
+                            <option value="food" {% if item.category == 'food' %}selected{% endif %}>Food</option>
+                            <option value="drinks" {% if item.category == 'drinks' %}selected{% endif %}>Drinks</option>
+                            <option value="desserts" {% if item.category == 'desserts' %}selected{% endif %}>Desserts</option>
+                        </select>
+                        <input type="file" name="image">
+                        <button type="submit">Update</button>
+                    </form>
+                    <form action="{{ url_for('admin.delete_item', item_id=item.id) }}" method="POST" style="display:inline;">
+                        <button type="submit" onclick="return confirm('Delete this item?')">Delete</button>
+                    </form>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </body>
+</html>
