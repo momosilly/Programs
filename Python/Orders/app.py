@@ -6,12 +6,26 @@ from flask_login import login_required, current_user, logout_user, LoginManager
 from models import db, Basket, Item, Order
 from admin import admin_bp
 from user import user_bp, User
+from flask_mail import Mail
+import os
+from dotenv import load_dotenv
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
 app.config['SECRET_KEY'] = 'mypassowrd'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://myuser:mypassword@localhost/orders'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+load_dotenv()
+
+app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER')
+app.config['MAIL_PORT'] = int(os.getenv('MAIL_PORT'))
+app.config['MAIL_USE_TLS'] = os.getenv('MAIL_USE_TLS') == 'True'
+app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
+app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
+app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_DEFAULT_SENDER')
+
+mail = Mail(app)
 
 db.init_app(app)
 app.register_blueprint(admin_bp)

@@ -102,10 +102,35 @@ button:hover{
 }
 #checkout{
     padding: 7px 10px;
-    background-color: white;
+    background-color: rgb(236, 236, 236);
     color: black;
     font-size: 0.9em;
+    width: 90%;
+    font-size: 1em;
+    margin: 0 auto;
+    display: block;
+}
+table{
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 10px;
 }
 .item-price{
     text-align: right;
+}
+#plusminus{
+    display: flex;
+    gap: 5px;
+}
+.plusminusButton{
+    border-radius: 50%;
+    background: none;
+    border: rgba(152, 152, 152, 0.539) solid 2px;
+}
+.basket{
+    padding: 100px;
+}
+hr{
+    width: 100%;
+    margin: 20px 0;
 }
