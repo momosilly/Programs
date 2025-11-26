@@ -6,14 +6,17 @@
         <link rel="stylesheet" href="{{ url_for('static', filename='menu.css') }}">
     </head>
     <body>
+        <!--Header-->
         <div id="anchors">
             <a href="{{ url_for('user.start_login') }}">Login</a>
+            <a href="{{ url_for('logout') }}">Logout</a>
             <div id="button-wrapper">
                 <button id="basket-toggle">
                     <img src="{{ url_for('static', filename='icons/cart.png') }}" alt="Shopping cart">
                 </button>
             </div>
         </div>
+        <!--Basket sidebar-->
         <div id="basket-sidebar">
             <button id="basket-close">
                 <img src="{{ url_for('static', filename='icons/x-mark.png') }}" alt="Close">
@@ -25,27 +28,23 @@
                     {% for item in basket_items %}
                         {% set ns.total = ns.total + (item.price * item.quantity) %}
                         <tr class="basket">
-                            <td>
+                            <td id="quantity-{{ item.id }}">
                                 {{ item.quantity }}
                             </td>
                             <td id="plusminus">
-                                <form action="{{ url_for('increase_quantity', item_id=item.id) }}" method="post">
-                                    <button type="submit" class="plusminusButton">
-                                    <svg width="8" height="8" viewBox="0 0 8 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M3 3.5H3.5V3V1C3.5 0.723858 3.72386 0.5 4 0.5C4.27614 0.5 4.5 0.723858 4.5 1V3V3.5H5H7C7.27614 3.5 7.5 3.72386 7.5 4C7.5 4.27614 7.27614 4.5 7 4.5H5H4.5V5V7C4.5 7.27614 4.27614 7.5 4 7.5C3.72386 7.5 3.5 7.27614 3.5 7V5V4.5H3H1C0.723858 4.5 0.5 4.27614 0.5 4C0.5 3.72386 0.723858 3.5 1 3.5H3Z" stroke="#FFF"></path>
+                                <button class="plusminusButton" data-item-id="{{ item.id }}" data-action="increase">
+                                <svg width="8" height="8" viewBox="0 0 8 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M3 3.5H3.5V3V1C3.5 0.723858 3.72386 0.5 4 0.5C4.27614 0.5 4.5 0.723858 4.5 1V3V3.5H5H7C7.27614 3.5 7.5 3.72386 7.5 4C7.5 4.27614 7.27614 4.5 7 4.5H5H4.5V5V7C4.5 7.27614 4.27614 7.5 4 7.5C3.72386 7.5 3.5 7.27614 3.5 7V5V4.5H3H1C0.723858 4.5 0.5 4.27614 0.5 4C0.5 3.72386 0.723858 3.5 1 3.5H3Z" stroke="#FFF"></path>
+                                </svg>
+                                </button>
+                                <button class="plusminusButton" data-item-id="{{ item.id }}" data-action="decrease">
+                                    <svg width="8" height="2" viewBox="0 0 8 2" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <mask id="path-1-inside-1" fill="white">
+                                            <path d="M7 0H1C0.447715 0 0 0.447715 0 1C0 1.55228 0.447715 2 1 2H7C7.55228 2 8 1.55228 8 1C8 0.447715 7.55228 0 7 0Z"></path>
+                                        </mask>
+                                        <path d="M1 2H7V-2H1V2ZM7 0H1V4H7V0ZM1 0C1.55228 0 2 0.447715 2 1H-2C-2 2.65685 -0.656854 4 1 4V0ZM6 1C6 0.447715 6.44772 0 7 0V4C8.65685 4 10 2.65685 10 1H6ZM7 2C6.44772 2 6 1.55228 6 1H10C10 -0.656854 8.65685 -2 7 -2V2ZM1 -2C-0.656854 -2 -2 -0.656854 -2 1H2C2 1.55228 1.55228 2 1 2V-2Z" fill="#FFF" mask="url(#path-1-inside-1)"></path>
                                     </svg>
-                                    </button>
-                                </form>
-                                <form action="{{ url_for('decrease_quantity', item_id=item.id) }}" method="post">
-                                    <button type="submit" class="plusminusButton">
-                                        <svg width="8" height="2" viewBox="0 0 8 2" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <mask id="path-1-inside-1" fill="white">
-                                                <path d="M7 0H1C0.447715 0 0 0.447715 0 1C0 1.55228 0.447715 2 1 2H7C7.55228 2 8 1.55228 8 1C8 0.447715 7.55228 0 7 0Z"></path>
-                                            </mask>
-                                            <path d="M1 2H7V-2H1V2ZM7 0H1V4H7V0ZM1 0C1.55228 0 2 0.447715 2 1H-2C-2 2.65685 -0.656854 4 1 4V0ZM6 1C6 0.447715 6.44772 0 7 0V4C8.65685 4 10 2.65685 10 1H6ZM7 2C6.44772 2 6 1.55228 6 1H10C10 -0.656854 8.65685 -2 7 -2V2ZM1 -2C-0.656854 -2 -2 -0.656854 -2 1H2C2 1.55228 1.55228 2 1 2V-2Z" fill="#FFF" mask="url(#path-1-inside-1)"></path>
-                                        </svg>
-                                    </button>
-                                </form>
+                                </button>
                             </td>
                             <td>
                                 {{ item.name }}
@@ -58,11 +57,12 @@
                 </table>
             </div>
             <hr />
-            <p><strong>Total: €{{ ns.total }}</strong></p>
+            <p><strong id="order-total">Total: €{{ ns.total }}</strong></p>
             <form action="{{ url_for('checkout') }}" method="post">
                 <button type="submit" id="checkout">Checkout</button>
             </form>
         </div>
+        <!--Menu-->
         <h1>Menu</h1>
         <nav class="menu-nav">
             <a href="#food">Food</a>
@@ -78,11 +78,9 @@
                     <img src="{{ url_for('static', filename=item.image_url.split('static/')[-1]) }}" alt="{{ item.image }}" height="228" width="234">
                     <p>{{ item.description }}</p>
                     <p>€{{ item.price }}</p>
-                    <form action="{{ url_for('add_to_basket', item_id=item.id) }}" method="post">
-                        <button type="submit" class="basket-button">
-                            <img src="{{ url_for('static', filename='icons/add-to-cart.png') }}" alt="Add to basket" height="24" width="24" />
-                        </button>
-                    </form>
+                    <button class="basket-button" data-item-id="{{ item.id }}">
+                        <img src="{{ url_for('static', filename='icons/add-to-cart.png') }}" alt="Add to basket" height="24" width="24" />
+                    </button>
                 </div>
             {% endfor %}
         </div>
@@ -95,11 +93,9 @@
                     <img src="{{ url_for('static', filename=item.image_url.split('static/')[-1]) }}" alt="{{ item.image }}" >
                     <p>{{ item.description }}</p>
                     <p>€{{ item.price }}</p>
-                    <form action="{{ url_for('add_to_basket', item_id=item.id) }}" method="post">
-                        <button type="submit" class="basket-button">
-                            <img src="{{ url_for('static', filename='icons/add-to-cart.png') }}" alt="Add to basket" height="24" width="24" />
-                        </button>
-                    </form>
+                    <button class="basket-button" data-item-id="{{ item.id }}">
+                        <img src="{{ url_for('static', filename='icons/add-to-cart.png') }}" alt="Add to basket" height="24" width="24" />
+                    </button>
                 </div>
             {% endfor %}
         </div>
@@ -112,22 +108,12 @@
                     <img src="{{ url_for('static', filename=item.image_url.split('static/')[-1]) }}" alt="{{ item.name }}" height="228" width="234">
                     <p>{{ item.description }}</p>
                     <p>€{{ item.price }}</p>
-                    <form action="{{ url_for('add_to_basket', item_id=item.id) }}" method="post">
-                        <button type="submit" class="basket-button">
-                            <img src="{{ url_for('static', filename='icons/add-to-cart.png') }}" alt="Add to basket" height="24" width="24" />
-                        </button>
-                    </form>
+                    <button class="basket-button" data-item-id="{{ item.id }}">
+                        <img src="{{ url_for('static', filename='icons/add-to-cart.png') }}" alt="Add to basket" height="24" width="24" />
+                    </button>
                 </div>
             {% endfor %}
         </div>
-        <script>
-            document.getElementById('basket-toggle').addEventListener('click', function() {
-                document.getElementById('basket-sidebar').classList.toggle('open');
-            });
-
-            document.getElementById('basket-close').addEventListener('click', function() {
-                document.getElementById('basket-sidebar').classList.remove('open');
-            });
-        </script>
+        <script src="{{ url_for('static', filename='JavaScript/menu.js') }}"></script>
     </body>
 </html>
