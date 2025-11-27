@@ -3,7 +3,7 @@ from flask_migrate import Migrate
 from flask import Flask, render_template, flash,  url_for, redirect, session, jsonify
 from datetime import datetime
 from flask_login import login_required, current_user, logout_user, LoginManager
-from models import db, Basket, Item, Order
+from models import db, Basket, Item, Order, LoginToken
 from admin import admin_bp
 from user import user_bp, User
 from flask_mail import Mail
@@ -32,11 +32,29 @@ db.init_app(app)
 app.register_blueprint(admin_bp)
 migrate = Migrate(app, db)
 
+def build_from_session(basket_dict):
+    items = []
+    for item_id_str, quantity in basket_dict.items():
+        item = item.query.get(int(item_id_str))
+        if item:
+            items.append({
+                'id': item.id,
+                'name': item.name,
+                'price': item.price,
+                'quantity': quantity
+            })
+    return items
+
 @app.route('/menu', methods=['POST', 'GET'])
 def menu():
     items = Item.query.all()
     basket = session.get('basket', {})
     basket_items = []
+
+    if current_user.is_authenticated:
+        basket_items = Basket.query.filter_by(user_id=current_user.id).all()
+    else:
+        basket_items = build_from_session(session.get('basket', {}))
 
     for item_id_str, quantity in basket.items():
         item = Item.query.get(int(item_id_str))
@@ -64,38 +82,65 @@ def view_basket():
 @app.route('/add_to_basket/<int:item_id>', methods=['POST'])
 def add_to_basket(item_id):
     item = Item.query.get_or_404(item_id)
-    
-    basket = session.get('basket', {})
 
-    item_id_str = str(item_id)
-    if item_id_str in basket:
-        basket[item_id_str] += 1
-        flash(f"{item.name} added to basket!")
+    if current_user.is_authenticated:
+        # Update basket in DB
+        existing = Basket.query.filter_by(user_id=current_user.id, item_id=item_id).first()
+        if existing:
+            existing.quantity += 1
+        else:
+            basket_item = Basket(user_id=current_user.id, item_id=item_id, quantity=1)
+            db.session.add(basket_item)
+            existing = basket_item
+        db.session.commit()
+
+        return jsonify({
+            'success': True,
+            'item_id': item_id,
+            'quantity': existing.quantity,
+            'name': item.name,
+            'price': item.price
+        })
+
     else:
-        basket[item_id_str] = 1
-    
-    session['basket'] = basket
-    return jsonify({
-        'success': True,
-        'item_id': item_id,
-        'quantity': basket[item_id_str],
-        'name': item.name,
-        'price': item.price
-    })
+        # Update basket in session
+        basket = session.get('basket', {})
+        item_id_str = str(item_id)
+        if item_id_str in basket:
+            basket[item_id_str] += 1
+        else:
+            basket[item_id_str] = 1
+
+        session['basket'] = basket
+
+        return jsonify({
+            'success': True,
+            'item_id': item_id,
+            'quantity': basket[item_id_str],
+            'name': item.name,
+            'price': item.price
+        })
 
 @app.route('/increase_quantity/<int:item_id>', methods=['POST'])
 def increase_quantity(item_id):
-    basket = session.get('basket', {})
-    item_id_str = str(item_id)
-    if item_id_str in basket:
-        basket[item_id_str] += 1
-    session['basket'] = basket
+    if current_user.is_authenticated:
+        basket_item = Basket.query.filter_by(user_id=current_user.id, item_id=item_id).first()
+        if basket_item:
+            basket_item.quantity += 1
+            db.session.commit()
+            return jsonify({'quantity': basket_item.quantity})
+    else:
+        basket = session.get('basket', {})
+        item_id_str = str(item_id)
+        if item_id_str in basket:
+            basket[item_id_str] += 1
+        session['basket'] = basket
 
-    return jsonify({
-        'success': True,
-        'item_id': item_id,
-        'quantity': basket[item_id_str]
-    })
+        return jsonify({
+            'success': True,
+            'item_id': item_id,
+            'quantity': basket[item_id_str]
+        })
 
 @app.route('/decrease_quantity/<int:item_id>', methods=['POST'])
 def decrease_quantity(item_id):
@@ -103,19 +148,34 @@ def decrease_quantity(item_id):
     item_id_str = str(item_id)
     quantity = 0
 
-    if item_id_str in basket:
-        basket[item_id_str] -= 1
-        if basket[item_id_str] <= 0:
-            del basket[item_id_str]
+    if current_user.is_authenticated:
+        basket_item = Basket.query.filter_by(user_id=current_user.id, item_id=item_id).first()
+        if basket_item:
+            basket_item.quantity -= 1
+            if basket_item.quantity <= 0:
+                #Delete item
+                db.session.delete(basket_item)
+                db.session.commit()
+                return jsonify({'quantity': 0})
+            
+            db.session.commit()
+            return jsonify({'quantity': basket_item.quantity})
         else:
-            quantity = basket[item_id_str]
+            return jsonify({'quantity': 0})
+    else:
+        if item_id_str in basket:
+            basket[item_id_str] -= 1
+            if basket[item_id_str] <= 0:
+                del basket[item_id_str]
+            else:
+                quantity = basket[item_id_str]
 
-    session['basket'] = basket
-    return jsonify({
-        'success': True,
-        'item_id': item_id,
-        'quantity': quantity
-    })
+        session['basket'] = basket
+        return jsonify({
+            'success': True,
+            'item_id': item_id,
+            'quantity': quantity
+        })
 
 @app.route('/checkout', methods=['POST', 'GET'])
 @login_required
