@@ -1,14 +1,15 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from flask import Flask, render_template, flash,  url_for, redirect, session, jsonify
+from flask import Flask, render_template, flash,  url_for, redirect, session, jsonify, request
 from datetime import datetime
 from flask_login import login_required, current_user, logout_user, LoginManager
-from models import db, Basket, Item, Order, LoginToken
+from models import db, Basket, Item, Order, LoginToken, OrderItem, Address
 from admin import admin_bp
 from user import user_bp, User
 from flask_mail import Mail
 import os
 from dotenv import load_dotenv
+import re
 
 
 app = Flask(__name__)
@@ -181,14 +182,103 @@ def decrease_quantity(item_id):
 @login_required
 def checkout():
     basket_items = Basket.query.filter_by(user_id=current_user.id).all()
-    #for item in basket_items:
-     #   order = Order(user_id=current_user.id, item_id=item.item_id)
-      #  db.session.add(order)
-       # db.session.delete(item)
+    address = Address.query.filter_by(user_id=current_user.id).all()
 
-    #db.session.commit()
-    flash("Order placed successfully!")
-    return render_template("checkout.html")
+    def validate_checout_form():
+        name = request.form.get("name")
+        street = request.form.get("street")
+        postcode = request.form.get("postcode")
+        city = request.form.get("city")
+        phone = request.form.get("phone")
+
+        patters = {
+        "name": r"^[A-Za-z]+ [A-Za-z]+$",
+        "street": r"^[A-Za-z0-9]+ [A-Za-z0-9\s]+$",
+        "postcode": r"^[0-9]{4}[A-Za-z]{2}$",
+        "city": r"^[A-Za-z\s]{2,50}$",
+        "phone": r"^06[0-9]{8}$"
+        }
+
+        for field, regex in patters.items():
+            value = locals()[field]
+            if not re.match(regex, value or ""):
+                flash(f"Invalid {field} format.")
+                return False
+        return True
+
+
+    if request.method == "POST":
+
+        if not basket_items:
+            flash("Your basket is empty")
+
+        selected_id = request.form.get('address_id')
+
+        if selected_id and selected_id.strip():
+            address_id = int(selected_id)
+        else:
+            name = request.form.get('name')
+            street = request.form.get('street')
+            postal_code = request.form.get('postcode')
+            city = request.form.get('city')
+            phone_number = request.form.get('phone')
+
+            if not validate_checout_form():
+                return render_template("checkout.html", address=address, basket_items=basket_items)
+
+            if name and street and postal_code and city and phone_number:
+                new_address = Address(
+                    user_id=current_user.id,
+                    name=name,
+                    street=street,
+                    postal_code=postal_code,
+                    city=city,
+                    phone_number=phone_number
+                )
+                db.session.add(new_address)
+                db.session.commit()
+                address_id=new_address.id
+            else:
+                flash("Please select a saved address or enter a new one")
+                return redirect(url_for("checkout"))
+
+        order = Order(
+            user_id=current_user.id, 
+            shipped=False, 
+            address_id=address_id, 
+            timestamp=datetime.utcnow()
+            )
+
+        db.session.add(order)
+        db.session.flush() #ensures order.id is available before adding items
+
+        total = 0
+        for basket_item in basket_items:
+            price = basket_item.item.price
+            quantity = basket_item.quantity
+
+            order_item = OrderItem(
+                order_id=order.id,
+                item_id=basket_item.item_id,
+                quantity=quantity,
+                price=price
+            )
+            db.session.add(order_item)
+
+            total += price * quantity
+            db.session.delete(basket_item)
+        
+        order.total = total
+        db.session.commit()
+
+        return redirect(url_for('thanks', order_id=order.id))
+    return render_template("checkout.html", basket_items=basket_items, address=address)
+
+@app.route("/thanks/<int:order_id>")
+@login_required
+def thanks(order_id):
+    order = Order.query.get_or_404(order_id)
+    return render_template("thanks.html", order=order)
 
 login_manager = LoginManager()
 login_manager.login_view = 'user.start_login'

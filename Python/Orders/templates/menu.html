@@ -58,8 +58,8 @@
             </div>
             <hr />
             <p><strong id="order-total">Total: €{{ ns.total }}</strong></p>
-            <form action="{{ url_for('checkout') }}" method="post">
-                <button type="submit" id="checkout">Checkout</button>
+            <form action="{{ url_for('checkout') }}">
+                <button id="checkout">Checkout</button>
             </form>
         </div>
         <!--Menu-->

@@ -3,8 +3,72 @@
     <head>
         <meta charset="UTF-8">
         <title>Checkout</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='checkout.css') }}">
     </head>
     <body>
-        
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="flash">
+                    {% for msg in messages %}
+                        <p>{{ msg }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <form method="post">
+            <div id="new-address">
+                <h3>Would you like to add a new address?</h3>
+                <label for="name">Full name</label>
+                <input type="text" name="name">
+
+                <label for="street">Street</label>
+                <input type="text" name="street">
+
+                <label for="postcode">Postcode</label>
+                <input type="text" name="postcode">
+                
+                <label for="city">City</label>
+                <input type="text" name="city">
+
+                <label for="phone">Phone number</label>
+                <input type="tel" name="phone" placeholder="06">
+            </div>
+            <input type="hidden" name="address_id" id="selected_address_id">
+            {% if address is not none %}
+                <h3>Your saved addresses</h3>
+                {% for addr in address %}
+                    <div class="saved-address" data-id="{{ addr.id  }}">
+                        <p>{{ addr.name }}</p>
+                        <p>{{ addr.street }}, {{ addr.city }}</p>
+                        <p>{{ addr.postal_code }}</p>
+                        <p>{{ addr.phone_number }}</p>
+                    </div>
+                {% endfor %}
+            {% endif %}
+            <div id="checkout-box">
+                {% set ns = namespace(total=0) %}
+                <h2>Your products</h2>
+                <table>
+                    {% for basket in basket_items %}
+                        {% set ns.total = ns.total + (basket.item.price * basket.quantity) %}
+                        <tr class="order-items">
+                            <td id="quantity-{{ basket.item.id }}">
+                                {{ basket.quantity }}
+                            </td>
+                            <td>
+                                {{ basket.item.name }}
+                            </td>
+                            <td class="item-price">
+                                €{{ basket.item.price }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </table>
+                <p><strong id="order-total">Total: €{{ ns.total }}</strong></p>
+                <button type="submit">Checkout</button>
+            </div>
+        </form>
+        <script src="{{ url_for('static', filename='JavaScript/checkout.js') }}"></script>
     </body>
 </html>

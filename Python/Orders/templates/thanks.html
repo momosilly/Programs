@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Order confirmation</title>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="{{ url_for('static', filename='thanks.css') }}">
+    </head>
+    <body>
+        <h2>Thank you for your order</h2>
+        <p>Your order number is {{ order.id }}</p>
+    </body>
+</html>
