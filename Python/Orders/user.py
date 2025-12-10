@@ -54,7 +54,7 @@ def verify_login(token):
     db.session.delete(login_token)
     db.session.commit()
 
-    return redirect(url_for('admin.dashboard' if user.is_admin else 'menu'))
+    return redirect(url_for('admin.dashboard' if user.has_role == "admin" else 'menu'))
 
 @user_bp.route('/start-login', methods=['POST', 'GET'])
 def start_login():

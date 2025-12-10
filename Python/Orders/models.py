@@ -4,14 +4,38 @@ from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 
 db = SQLAlchemy()
+
+# Association table for many-to-many relationship
+class UserRole(db.Model):
+    __tablename__ = 'user_roles'
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    role_id = db.Column(db.Integer, db.ForeignKey('roles.id'), primary_key=True)
+
+    user = db.relationship("User", back_populates="user_roles")
+    role = db.relationship("Role", back_populates="user_roles")
 class User(db.Model, UserMixin):
     __tablename__ = 'users'
 
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    is_admin = db.Column(db.Boolean, default=False)
+
     orders = db.relationship('Order', backref='customer', lazy=True)
     addresses = db.relationship('Address', back_populates='user', lazy=True)
+    user_roles = db.relationship("UserRole", back_populates="user", cascade="all, delete-orphan")
+    roles = db.relationship("Role", secondary="user_roles", back_populates="users", viewonly=True)
+
+    def has_role(self, role_name):
+        """Check if user has a specific role by name."""
+        return any(r.role == role_name for r in self.roles)
+    
+class Role(db.Model):
+    __tablename__ = 'roles'
+
+    id = db.Column(db.Integer, primary_key=True)
+    role = db.Column(db.String(50), unique=True, nullable=False)
+
+    user_roles = db.relationship("UserRole", back_populates="role", cascade="all, delete-orphan")
+    users = db.relationship("User", secondary="user_roles", back_populates="roles", viewonly=True)
     
 class LoginToken(db.Model):
     __tablename__ = 'login_tokens'

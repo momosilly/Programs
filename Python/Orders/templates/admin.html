@@ -35,8 +35,8 @@
             <input type="text" name="query" placeholder="Search by name" required>
             <button type="submit">Search</button>
         </form>
-        {% if query %}
-            <h2>Matching Items{% if query %} for "{{ query }}"{% endif %}</h2>
+        {% if item_query %}
+            <h2>Matching Items{% if item_query %} for "{{ item_query }}"{% endif %}</h2>
             {% for item in items %}
                 <div class="menu-item">
                     <p>ID: {{ item.id }} | Name: {{ item.name }} | Price: €{{ item.price }}</p>
@@ -55,6 +55,28 @@
                     </form>
                     <form action="{{ url_for('admin.delete_item', item_id=item.id) }}" method="POST" style="display:inline;">
                         <button type="submit" onclick="return confirm('Delete this item?')">Delete</button>
+                    </form>
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        <h2>Search Users</h2>
+        <form method="GET" action="{{ url_for('admin.dashboard') }}">
+            <input type="text" name="user_query" placeholder="Search by email" required>
+            <button type="submit">Search</button>
+        </form>
+        {% if user_query %}
+            <h2>Matching users{% if user_query %} for "{{ user_query }}"{% endif %}</h2>
+            {% for user in users %}
+                <div class="user">
+                    <p>ID: {{ user.id }}</p>
+
+                    <form action="{{ url_for('admin.add_role', user_id=user.id) }}" method="post" enctype="multipart/form-data">
+                        <select name="role_id" required>
+                            <option value="1">Admin</option>
+                            <option value="2">Delivery</option>
+                        </select>
+                        <button type="submit">Add</button>
                     </form>
                 </div>
             {% endfor %}
