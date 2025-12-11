@@ -3,8 +3,9 @@ from flask_migrate import Migrate
 from flask import Flask, render_template, flash,  url_for, redirect, session, jsonify, request
 from datetime import datetime
 from flask_login import login_required, current_user, logout_user, LoginManager
-from models import db, Basket, Item, Order, LoginToken, OrderItem, Address
+from models import db, Basket, Item, Order, LoginToken, OrderItem, Address, OrderStatus
 from admin import admin_bp
+from delivery import delivery_bp
 from user import user_bp, User
 from flask_mail import Mail
 import os
@@ -31,6 +32,7 @@ mail = Mail(app)
 
 db.init_app(app)
 app.register_blueprint(admin_bp)
+app.register_blueprint(delivery_bp)
 migrate = Migrate(app, db)
 
 def build_from_session(basket_dict):
@@ -61,7 +63,6 @@ def menu():
         item = Item.query.get(int(item_id_str))
         if item:
             item.quantity = quantity
-            
             basket_items.append(item)
     return render_template('menu.html', items=items, basket=basket, basket_items=basket_items)
 
@@ -211,6 +212,7 @@ def checkout():
 
         if not basket_items:
             flash("Your basket is empty")
+            return redirect(url_for('menu'))
 
         selected_id = request.form.get('address_id')
 
@@ -243,14 +245,18 @@ def checkout():
                 return redirect(url_for("checkout"))
 
         order = Order(
-            user_id=current_user.id, 
-            shipped=False, 
+            user_id=current_user.id,
             address_id=address_id, 
             timestamp=datetime.utcnow()
             )
 
         db.session.add(order)
         db.session.flush() #ensures order.id is available before adding items
+
+        new_status = OrderStatus(order_id=order.id)
+
+        db.session.add(new_status)
+        db.session.commit()
 
         total = 0
         for basket_item in basket_items:
@@ -297,9 +303,6 @@ def load_user(user_id):
 
 app.register_blueprint(user_bp)
 
-@app.errorhandler(403)
-def forbidden(e):
-    return render_template('403.html'), 403
 
 if __name__ == '__main__':
     app.run(debug=True)

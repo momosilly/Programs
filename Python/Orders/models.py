@@ -71,18 +71,34 @@ class Item(db.Model):
 
     order_items = db.relationship('OrderItem', back_populates='item', lazy=True, foreign_keys='OrderItem.item_id')
 
+class OrderStatus(db.Model):
+    __tablename__ = 'order_status'
+    id = db.Column(db.Integer, primary_key=True)
+    order_id = db.Column(db.Integer, db.ForeignKey('orders.id'), nullable=False)
+
+    prepared = db.Column(db.Boolean, default=False)
+    prepared_at = db.Column(db.DateTime)
+
+    underway = db.Column(db.Boolean, default=False)
+    underway_at = db.Column(db.DateTime)
+
+    delivered = db.Column(db.Boolean, default=False)
+    delivered_at = db.Column(db.DateTime)
+
+    order = db.relationship("Order", back_populates="status")
+
 class Order(db.Model):
     __tablename__ = 'orders'
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     address_id = db.Column(db.Integer, db.ForeignKey('address.id'))
-    shipped = db.Column(db.Boolean, default=False)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     total = db.Column(db.Numeric(10, 2))
 
     address = db.relationship('Address', back_populates='orders')
     items = db.relationship('OrderItem', back_populates='order', cascade="all, delete-orphan")
+    status = db.relationship('OrderStatus', back_populates="order", uselist=False)
 
 class OrderItem(db.Model):
     __tablename__ = 'order_items'

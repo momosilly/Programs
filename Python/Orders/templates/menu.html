@@ -8,8 +8,11 @@
     <body>
         <!--Header-->
         <div id="anchors">
-            <a href="{{ url_for('user.start_login') }}">Login</a>
-            <a href="{{ url_for('logout') }}">Logout</a>
+            {% if current_user.is_authenticated %}
+                <a href="{{ url_for('logout') }}">Logout</a>
+            {% else %}
+                <a href="{{ url_for('user.start_login') }}">Login</a>
+            {% endif %}
             <div id="button-wrapper">
                 <button id="basket-toggle">
                     <img src="{{ url_for('static', filename='icons/cart.png') }}" alt="Shopping cart">
@@ -23,6 +26,15 @@
             </button>
             {% set ns = namespace(total=0) %}
             <h2>Your basket</h2>
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <div class="flash">
+                        {% for msg in messages %}
+                            <p>{{ msg }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
             <div id="order">
                 <table>
                     {% for basket in basket_items %}

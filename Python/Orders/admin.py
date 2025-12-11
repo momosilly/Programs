@@ -47,15 +47,6 @@ def add_role(user_id):
     flash(f"Assigned role {role.role} to user {user.email}")
     return redirect(url_for("admin.dashboard"))
 
-@admin_bp.route('/ship/<int:order_id>', methods=['POST'])
-@login_required
-def mark_shipped(order_id):
-    order = Order.query.get_or_404(order_id)
-    order.shipped = True
-    db.session.commit()
-    flash("Order marked as shipped.")
-    return redirect(url_for('admin.dashboard'))
-
 @admin_bp.route('/add_item', methods=['POST'])
 @login_required
 def add_item():
