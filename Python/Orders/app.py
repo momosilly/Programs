@@ -3,6 +3,7 @@ from flask_migrate import Migrate
 from flask import Flask, render_template, flash,  url_for, redirect, session, jsonify, request
 from datetime import datetime
 from flask_login import login_required, current_user, logout_user, LoginManager
+from types import SimpleNamespace
 from models import db, Basket, Item, Order, LoginToken, OrderItem, Address, OrderStatus
 from admin import admin_bp
 from delivery import delivery_bp
@@ -38,14 +39,9 @@ migrate = Migrate(app, db)
 def build_from_session(basket_dict):
     items = []
     for item_id_str, quantity in basket_dict.items():
-        item = item.query.get(int(item_id_str))
+        item = Item.query.get(int(item_id_str))
         if item:
-            items.append({
-                'id': item.id,
-                'name': item.name,
-                'price': item.price,
-                'quantity': quantity
-            })
+            items.append(SimpleNamespace(item=item, quantity=quantity))
     return items
 
 @app.route('/menu', methods=['POST', 'GET'])
@@ -59,11 +55,8 @@ def menu():
     else:
         basket_items = build_from_session(session.get('basket', {}))
 
-    for item_id_str, quantity in basket.items():
-        item = Item.query.get(int(item_id_str))
-        if item:
-            item.quantity = quantity
-            basket_items.append(item)
+    # session-based basket items are built by `build_from_session`
+    # and for authenticated users `basket_items` are Basket model instances.
     return render_template('menu.html', items=items, basket=basket, basket_items=basket_items)
 
 @app.route('/basket')
