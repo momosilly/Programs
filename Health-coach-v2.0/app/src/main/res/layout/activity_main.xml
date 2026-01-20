@@ -104,7 +104,7 @@
                 android:id="@+id/userInputField"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="How are you feeling today?"
+                android:hint="Ask Health Coach"
                 android:padding="16dp"
                 android:minHeight="100dp"
                 android:gravity="top|start"

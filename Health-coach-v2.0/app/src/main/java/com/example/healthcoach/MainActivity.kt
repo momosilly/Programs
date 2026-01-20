@@ -45,7 +45,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var geminiResponseText: TextView
     private lateinit var closeButton: ImageButton
 
-    private val serverUrl = "http://192.168.1.209:5000/healthdata"
+    private val serverUrl = "https://health-coach-q3av.onrender.com//healthdata"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
