@@ -27,6 +27,7 @@ import java.io.IOException
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.content.Context
+import android.os.Build
 
 class MainActivity : AppCompatActivity() {
 
@@ -63,20 +64,67 @@ class MainActivity : AppCompatActivity() {
         geminiResponseText = findViewById(R.id.geminiResponseText)
         closeButton = findViewById(R.id.closeButton)
 
-        // Check Health Connect
-        val sdkStatus = HealthConnectClient.getSdkStatus(this, "com.google.android.apps.healthdata")
+        // Check Android version (API 34 = Android 14)
+        val androidVersion = Build.VERSION.SDK_INT
+        val isAndroid14Plus = androidVersion >= 34  // Android 14 = API 34
+
+        Log.d("HC", "Android API Level: $androidVersion")
+
+        // Try to get the correct provider package name
+        val availablePackages = HealthConnectClient.getHealthConnectManageDataIntent(this)
+        Log.d("HC", "Health Connect action: $availablePackages")
+
+        // Determine package name based on Android version
+        val packageName = if (isAndroid14Plus) {
+            "com.android.healthconnect.controller" // Android 14+ built-in
+        } else {
+            "com.google.android.apps.healthdata" // Android 13 and below
+        }
+
+        val sdkStatus = HealthConnectClient.getSdkStatus(this, packageName)
+
+        Log.d("HC", "Using package: $packageName")
+        Log.d("HC", "SDK Status: $sdkStatus")
+        Log.d("HC", "SDK_AVAILABLE constant: ${HealthConnectClient.SDK_AVAILABLE}")
+
         if (sdkStatus != HealthConnectClient.SDK_AVAILABLE) {
             statusText.text = "❌ Health Connect not available"
             requestButton.isEnabled = false
-            openSettingsButton.text = "Install Health Connect"
             sendButton.isEnabled = false
 
-            openSettingsButton.setOnClickListener {
-                val intent = Intent(Intent.ACTION_VIEW).apply {
-                    data = Uri.parse("https://play.google.com/store/apps/details?id=com.google.android.apps.healthdata")
-                    setPackage("com.android.vending")
+            if (isAndroid14Plus) {
+                // Android 14+: Health Connect is built-in
+                openSettingsButton.text = "Open Health Settings"
+                openSettingsButton.setOnClickListener {
+                    try {
+                        val intent = Intent("android.health.connect.action.MANAGE_HEALTH_DATA")
+                        startActivity(intent)
+                    } catch (e: Exception) {
+                        Log.e("HC", "Failed to open Health Connect settings", e)
+                        try {
+                            // Fallback: Try direct package intent
+                            val fallbackIntent = Intent().apply {
+                                action = Intent.ACTION_MAIN
+                                setPackage("com.android.healthconnect.controller")
+                            }
+                            startActivity(fallbackIntent)
+                        } catch (e2: Exception) {
+                            Log.e("HC", "Fallback also failed", e2)
+                            // Last resort: general settings
+                            startActivity(Intent(Settings.ACTION_SETTINGS))
+                        }
+                    }
                 }
-                startActivity(intent)
+            } else {
+                // Android 13 and below: Need separate app
+                openSettingsButton.text = "Install Health Connect"
+                openSettingsButton.setOnClickListener {
+                    val intent = Intent(Intent.ACTION_VIEW).apply {
+                        data = Uri.parse("https://play.google.com/store/apps/details?id=com.google.android.apps.healthdata")
+                        setPackage("com.android.vending")
+                    }
+                    startActivity(intent)
+                }
             }
             return
         }
@@ -109,6 +157,7 @@ class MainActivity : AppCompatActivity() {
                     }
                 } catch (e: Exception) {
                     Log.e("HC", "Error requesting permissions", e)
+                    e.printStackTrace()
                     statusText.text = "❌ Error: ${e.message}"
                 }
             }
@@ -117,18 +166,28 @@ class MainActivity : AppCompatActivity() {
         // Open Health Connect button
         openSettingsButton.setOnClickListener {
             try {
-                val intent = packageManager.getLaunchIntentForPackage("com.google.android.apps.healthdata")
-                if (intent != null) {
+                if (isAndroid14Plus) {
+                    // Android 14+: Use the action from getHealthConnectManageDataAction
+                    val intent = Intent("android.health.connect.action.MANAGE_HEALTH_DATA")
                     startActivity(intent)
-                    statusText.text = "📱 Opening Health Connect..."
+                    statusText.text = "📱 Opening Health Connect Settings..."
                 } else {
-                    val settingsIntent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                        data = Uri.fromParts("package", "com.google.android.apps.healthdata", null)
+                    // Android 13 and below: Open Health Connect app
+                    val intent = packageManager.getLaunchIntentForPackage(packageName)
+                    if (intent != null) {
+                        startActivity(intent)
+                        statusText.text = "📱 Opening Health Connect..."
+                    } else {
+                        val settingsIntent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                            data = Uri.fromParts("package", packageName, null)
+                        }
+                        startActivity(settingsIntent)
                     }
-                    startActivity(settingsIntent)
                 }
             } catch (e: Exception) {
-                statusText.text = "❌ Could not open Health Connect"
+                Log.e("HC", "Error opening Health Connect", e)
+                e.printStackTrace()
+                statusText.text = "❌ Could not open Health Connect: ${e.message}"
             }
         }
 
@@ -137,11 +196,10 @@ class MainActivity : AppCompatActivity() {
             val userInput = inputField.text.toString().trim()
 
             // Hide keyboard
-            val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
             imm.hideSoftInputFromWindow(inputField.windowToken, 0)
 
             lifecycleScope.launch {
-                // Show loading
                 showLoading(true)
                 responseCard.visibility = View.GONE
 
@@ -149,13 +207,14 @@ class MainActivity : AppCompatActivity() {
                     collectAndSendData(userInput)
                 } catch (e: Exception) {
                     Log.e("HC", "Error collecting data", e)
+                    e.printStackTrace()
                     showLoading(false)
                     showError("Failed to collect health data: ${e.message}")
                 }
             }
         }
 
-        // Close button for response card
+        // Close button
         closeButton.setOnClickListener {
             responseCard.visibility = View.GONE
             inputField.text.clear()
@@ -188,7 +247,7 @@ class MainActivity : AppCompatActivity() {
                 statusText.text = "❌ No permissions granted. Please grant at least one permission."
             }
         } catch (e: Exception) {
-            statusText.text = "❌ Error checking permissions"
+            statusText.text = "❌ Error checking permissions. Please make sure that Health Connect is installed."
             Log.e("HC", "Error updating status", e)
         }
     }
