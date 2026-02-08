@@ -247,7 +247,7 @@ class MainActivity : AppCompatActivity() {
                 statusText.text = "❌ No permissions granted. Please grant at least one permission."
             }
         } catch (e: Exception) {
-            statusText.text = "❌ Error checking permissions. Please make sure that Health Connect is installed."
+            statusText.text = "Health Connect is required. Please install it and grant permission to continue."
             Log.e("HC", "Error updating status", e)
         }
     }
