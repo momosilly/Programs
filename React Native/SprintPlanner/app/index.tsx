@@ -1,8 +1,9 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, Pressable, TextInput, Button } from 'react-native';
+import { StyleSheet, Text, View, Pressable, TextInput, Button, Alert } from 'react-native';
 import React, { useState } from "react";
-import { AsyncStorage } from '@react-native-async-storage/async-storage'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
+import { getAuthKey } from '../src/storage/keys';
 
 export default function App() {
     const [text, setOnChangeText] = useState("");
@@ -11,6 +12,7 @@ export default function App() {
     const [showStart, setShowstart] = useState(false);
     const [showDeadline, setShowDeadline] = useState(false);
     
+    //Datepicker configuration
     const onStartChange = (_: any, selectedDate ?: Date) => {
         setShowstart(false);
         if (selectedDate) {
@@ -29,6 +31,8 @@ export default function App() {
     in7Days.setDate(today.getDate() + 7);
 
     const [height, setHeight] = useState(40);
+    const [items, setItems] = useState<[string, string | null][]>([]);
+
     return (
         <View style={styles.container}>
             <TextInput 
@@ -42,7 +46,7 @@ export default function App() {
                 }
             />
             <View>
-                <Button title="Select start date" onPress={() => setShowstart(true)}/>
+                <Button title={JSON.stringify(startDate)} onPress={() => setShowstart(true)}/>
                 {showStart && (
                     <DateTimePicker 
                         value={startDate}
@@ -65,7 +69,8 @@ export default function App() {
                     />
                 )}
             </View>
-            <Pressable>
+            <Pressable
+            >
                 <Text>Submit</Text>
             </Pressable>
         </View>
