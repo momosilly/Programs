@@ -3,15 +3,24 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from datetime import datetime, timedelta
 from werkzeug.security import generate_password_hash, check_password_hash
-import jwt
+from flask_jwt_extended import (
+    JWTManager,
+    jwt_required,
+    create_access_token,
+    get_jwt_identity,
+    get_jwt
+)
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'mypassword'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://myuser:mypassword@localhost/sprintplanner'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config["JWT_SECRET_KEY"] = "super-secret-key"
+
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
+jwt = JWTManager(app)
 
 #Models
 class User(db.Model):
@@ -42,55 +51,32 @@ class Project(db.Model):
             "deadline": self.deadline.isoformat(),
             "created_at": self.created_at.isoformat(),
         }
-    
-#Token helpers    
-def create_token(user):
-    payload = {
-        "user_id": user.id,
-        "is_admin": user.is_admin,
-        "exp": datetime.utcnow() + timedelta(days=7)
-    }
-    return jwt.encode(payload, app.config["SECRET_KEY"], algorithm="HS256")
-
-def decode_token(token):
-    try:
-        return jwt.decode(token, app.config["SECRET_KEY"], algorithms=["HS256"])
-    except:
-        return None
-    
-def get_current_user():
-    auth = request.headers.get("Authorization")
-    if not auth:
-        return None
-    
-    token = auth.split(" ")[1]
-    data = decode_token(token)
-    return data
 
 #Auth routes
 @app.post("/signup")
 def signup():
-    data = request.json
+    data = request.get_json()
     name = data["name"]
     email = data["email"]
-    password = data["password"]
+    password = generate_password_hash(data["password"])
 
     existing = User.query.filter_by(email=email).first()
     if existing:
         return jsonify({"error": "Email already registered"}), 400
 
-    hashed = generate_password_hash(password)
-
-    new_user = User(name=name, email=email, password=hashed)
-    db.session.add(new_user)
+    user = User(name=name, email=email, password=password)
+    db.session.add(user)
     db.session.commit()
 
-    token = create_token(new_user)
-    return jsonify({"token": token})
+    token = create_access_token(
+        identity=str(user.id),
+        additional_claims={"is_admin": user.is_admin}
+    )
+    return jsonify(token=token)
 
 @app.post("/login")
 def login():
-    data = request.json
+    data = request.get_json()
     email = data["email"]
     password = data["password"]
 
@@ -98,16 +84,22 @@ def login():
     if not user or not check_password_hash(user.password, password):
         return jsonify({"error": "Invalid credentials"}), 401
 
-    
-    token = create_token(user)
-    return jsonify({"token": token})
+    token = create_access_token(
+        identity=str(user.id),
+        additional_claims={"is_admin": user.is_admin}
+    )
+    return jsonify(token=token)
 
 #Protected routes
 @app.post("/submit")
+@jwt_required
 def submit_request():
-    user = get_current_user()
-    if not user:
-        return jsonify({"error": "Unauthorized"}), 401
+    user_id = get_jwt_identity()
+    claims = get_jwt()
+    is_admin = claims["is_admin"]
+
+    if is_admin:
+        return jsonify({"error": "Admins cannot submit requests"}), 403
 
     data = request.json
     learning_objectives = data["learning_objectives"]
@@ -115,7 +107,7 @@ def submit_request():
     deadline = datetime.fromisoformat(data["deadline"]).date()
 
     new_project = Project(
-        user_id=user["user_id"],
+        user_id=user_id,
         learning_objectives=learning_objectives,
         start_date=start_date,
         deadline=deadline
@@ -127,17 +119,39 @@ def submit_request():
     return jsonify({"status": "ok"})
 
 @app.get("/projects")
+@jwt_required()
 def get_projects():
-    user = get_current_user()
-    if not user:
-        return jsonify({"error": "Unauthorized"}), 401
+    user_id = int(get_jwt_identity())
+    claims = get_jwt()
+    is_admin = claims["is_admin"]
 
-    if user["is_admin"]:
-        projects = Project.query.order_by(Project.created_at.desc()).all()
+    if is_admin:
+        projects = db.session.query(Project, User).join(User, Project.user_id == User.id).all()
+        result = [
+            {
+                "id": p.id,
+                "learning_objectives": p.learning_objectives,
+                "start_date": p.start_date,
+                "deadline": p.deadline,
+                "user_id": p.user_id,
+                "user_name": u.name
+            }
+            for p, u in projects
+        ]
     else:
-        projects = Project.query.filter_by(user_id=user["user_id"]).order_by(Project.created_at.desc()).all()
+        projects = Project.query.filter_by(user_id=user_id).all()
+        result = [
+            {
+                "id": p.id,
+                "learning_objectives": p.learning_objectives,
+                "start_date": p.start_date,
+                "deadline": p.deadline,
+                "user_id": p.user_id
 
-    return jsonify([p.to_dict() for p in projects])
+            }
+            for p in projects
+        ]
+    return jsonify(result)
 
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0')

@@ -1,11 +1,13 @@
 import { StatusBar } from 'expo-status-bar';
+import { useRouter } from 'expo-router';
 import { StyleSheet, Text, View, Pressable, TextInput, Button, Alert } from 'react-native';
 import React, { useState } from "react";
-import AsyncStorage from '@react-native-async-storage/async-storage'
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
-import { getAuthKey } from '../src/storage/keys';
+import { submitRequest, logout } from '../../src/api';
 
 export default function App() {
+    const router = useRouter();
+
     const [text, setOnChangeText] = useState("");
     const [startDate, setStartDate] = useState(new Date);
     const [deadline, setDeadline] = useState(new Date());
@@ -46,7 +48,7 @@ export default function App() {
                 }
             />
             <View>
-                <Button title={JSON.stringify(startDate)} onPress={() => setShowstart(true)}/>
+                <Button title='Select start date' onPress={() => setShowstart(true)}/>
                 {showStart && (
                     <DateTimePicker 
                         value={startDate}
@@ -70,9 +72,20 @@ export default function App() {
                 )}
             </View>
             <Pressable
+                onPress={() => 
+                    submitRequest({
+                        text,
+                        startDate: startDate.toISOString().split("T")[0],
+                        deadline: deadline.toISOString().split("T")[0]
+                    })
+                }
             >
                 <Text>Submit</Text>
             </Pressable>
+            <Button title='Logout' onPress={async () => {
+                await logout();
+                router.replace("/(modals)/login");
+            }} />
         </View>
     );
 }

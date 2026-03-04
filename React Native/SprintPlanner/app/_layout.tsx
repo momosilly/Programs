@@ -1,7 +1,20 @@
-import { Tabs } from "expo-router";
+import { Slot, useRouter } from "expo-router";
+import { useEffect } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getAuthKey } from "../src/storage/keys";
 
 export default function RootLayout() {
-    return (
-        <Tabs />
-    );
+    const router = useRouter();
+
+    useEffect(() => {
+        const checkAuth = async () => {
+            const token = await AsyncStorage.getItem(getAuthKey("token"));
+            if (!token) {
+                router.push("/(modals)/signup");
+            }
+        };
+        checkAuth();
+    }, []);
+
+    return <Slot />
 }

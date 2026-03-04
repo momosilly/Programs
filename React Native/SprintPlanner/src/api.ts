@@ -11,34 +11,43 @@ interface SignupPayload extends LoginPayload {
 }
 
 interface submitFetch {
-    learningObjectives: string
+    text: string
     startDate: string
     deadline: string
 }
 
 export const signup = async ({name, email, password}: SignupPayload) => {
-    const response = await fetch("http://10.37.25.50:5000/signup", {
+    const response = await fetch("http://10.0.2.2:5000/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body:JSON.stringify({ name, email, password })
     });
 
     const data = await response.json();
+
+    if (data.token) {
     await AsyncStorage.setItem(getAuthKey('token'), data.token);
+    }
+
+    return data;
 };
 
 export const login = async ({email, password}: LoginPayload) => {
-    const response = await fetch("http://10.37.25.50:5000/login", {
+    const response = await fetch("http://10.0.2.2:5000/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password })
     });
 
     const data = await response.json();
+    if (data.token) {
     await AsyncStorage.setItem(getAuthKey('token'), data.token);
+    }
+
+    return data;
 };
 
-export const submitRequest = async ({learningObjectives, startDate, deadline}: submitFetch) => {
+export const submitRequest = async ({text, startDate, deadline}: submitFetch) => {
     const token = await AsyncStorage.getItem(getAuthKey('token'));
 
     if (!token) {
@@ -46,14 +55,14 @@ export const submitRequest = async ({learningObjectives, startDate, deadline}: s
         return;
     }
 
-    const response = await fetch("http://10.37.25.50:5000/submit", {
+    const response = await fetch("http://10.0.2.2:5000/submit", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${token}`
         },
         body: JSON.stringify({
-            learning_objectives: learningObjectives,
+            learning_objectives: text,
             start_date: startDate,
             deadline: deadline
         })
@@ -68,10 +77,10 @@ export const fetchRequests = async () => {
 
     if (!token) {
         console.log("No token found");
-        return;
+        return [];
     }
 
-    const response = await fetch("http://10.37.25.50:5000/projects", {
+    const response = await fetch("http://10.0.2.2:5000/projects", {
         headers: {
             "Authorization": `Bearer ${token}`
         }
@@ -79,4 +88,9 @@ export const fetchRequests = async () => {
 
     const data = await response.json();
     console.log(data);
+    return data;
 }
+
+export const logout = async () => {
+  await AsyncStorage.removeItem(getAuthKey("token"));
+};
