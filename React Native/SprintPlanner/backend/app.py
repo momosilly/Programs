@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import (
     JWTManager,
@@ -40,7 +40,7 @@ class Project(db.Model):
     learning_objectives = db.Column(db.Text, nullable=False)
     start_date = db.Column(db.Date, nullable=False)
     deadline = db.Column(db.Date, nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.now(UTC))
 
     def to_dict(self):
         return {
@@ -51,6 +51,19 @@ class Project(db.Model):
             "deadline": self.deadline.isoformat(),
             "created_at": self.created_at.isoformat(),
         }
+    
+class Status(db.Model):
+    __tablename__ = 'status'
+
+    id = db.Column(db.Integer,primary_key=True)
+    project_id = db.Column(db.Integer, db.ForeignKey('projects.id'), nullable=False)
+    pending = db.Column(db.Boolean, default=True)
+    approved = db.Column(db.Boolean, default=False)
+    approved_at = db.Column(db.Date, default=datetime.now(UTC).date())
+    handed_in = db.Column(db.Boolean, default=False)
+    handed_in_at = db.Column(db.Date, default=datetime.now(UTC).date())
+    signed = db.Column(db.Boolean, default=False)
+    signed_at = db.Column(db.Date, default=datetime.now(UTC).date())
 
 #Auth routes
 @app.post("/signup")
@@ -92,9 +105,9 @@ def login():
 
 #Protected routes
 @app.post("/submit")
-@jwt_required
+@jwt_required()
 def submit_request():
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     claims = get_jwt()
     is_admin = claims["is_admin"]
 
@@ -114,6 +127,10 @@ def submit_request():
     )
 
     db.session.add(new_project)
+    db.session.commit()
+
+    new_status = Status(project_id=new_project.id)
+    db.session.add(new_status)
     db.session.commit()
 
     return jsonify({"status": "ok"})
@@ -152,6 +169,10 @@ def get_projects():
             for p in projects
         ]
     return jsonify(result)
+
+@app.post('/status')
+def status():
+
 
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0')

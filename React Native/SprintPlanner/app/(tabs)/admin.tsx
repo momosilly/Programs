@@ -27,6 +27,7 @@ export default function Submitted() {
                 keyExtractor={(item) => item.id.toString()}
                 renderItem={({ item }) => (
                 <View style={{ marginVertical: 10 }}>
+                    <Text>Name: {item.user_name}</Text>
                     <Text>Objectives: {item.learning_objectives}</Text>
                     <Text>Start: {item.start_date}</Text>
                     <Text>Deadline: {item.deadline}</Text>
