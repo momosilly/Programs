@@ -170,9 +170,63 @@ def get_projects():
         ]
     return jsonify(result)
 
-@app.post('/status')
-def status():
+@app.get('/projects/<int:project_id>')
+@jwt_required()
+def get_single_project(project_id):
+    user_id = int(get_jwt_identity())
+    claims = get_jwt()
+    is_admin = claims["is_admin"]
 
+    project = Project.query.get(project_id)
+    if not project:
+        return jsonify({"error": "Project not found"}), 404
+    
+    if not is_admin and project.user_id != user_id:
+        return jsonify({"error": "Unauthorized"}), 403
+    
+    status = Status.query.filter_by(project_id=project_id).first()
+
+    return jsonify({
+        "project": project.to_dict(),
+        "status": {
+            "pending": status.pending,
+            "approved": status.approved,
+            "approved_at": status.approved_at,
+            "handed_in": status.handed_in,
+            "handed_in_at": status.handed_in_at,
+            "signed": status.signed,
+            "signed_at": status.signed_at
+        }
+    })
+
+@app.patch('/projects/<int:project_id>/status')
+@jwt_required()
+def update_status(project_id):
+    user_id = int(get_jwt_identity())
+    claims = get_jwt()
+    is_admin = claims['is_admin']
+
+    status = Status.query.filter_by(project_id=project_id).first()
+
+    if not status:
+        return jsonify({"error": "Status not found"}), 404
+    
+    data = request.get_json()
+
+    if not is_admin:
+        if "handed_in" in data:
+            status.handed_in = data['handed_in']
+            status.handed_in_at = datetime.now(UTC).date()
+    if is_admin:
+        if "approved" in data:
+            status.approved = data['approved']
+            status.approved_at = datetime.now(UTC).date()
+        if "signed" in data:
+            status.signed = data['signed']
+            status.signed_at = datetime.now(UTC).date()
+
+    db.session.commit()
+    return jsonify({"status": "updated"})
 
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0')
