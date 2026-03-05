@@ -13,7 +13,8 @@ export default function LoginModal() {
         const result = await login({ email, password });
         if (result?.token) {
             const user = await getUserFromToken();
-            router.replace(user?.is_admin ? '/(tabs)/admin' : '/(tabs)/project');
+            router.dismissAll();
+            router.push(user?.is_admin ? '/(tabs)/admin' : '/(tabs)/project');
         } else {
             console.log('Login failed:', result.error);
         }
