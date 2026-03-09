@@ -94,3 +94,26 @@ export const fetchRequests = async () => {
 export const logout = async () => {
   await AsyncStorage.removeItem(getAuthKey("token"));
 };
+
+export const getProject = async (id: number, token: string) => {
+    const response = await fetch(`http://10.0.2.2:5000/projects/${id}`, {
+        headers: {
+            "Authorization": `Bearer ${token}`
+        }
+    });
+
+    return response.json()
+}
+
+export const updateStatus = async (id: number, data: any, token: string) => {
+    const response = await fetch (`http://10.0.2.2:5000/projects/${id}/status`, {
+        method: "PATCH",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify(data)
+    });
+    
+    return response.json();
+}

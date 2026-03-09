@@ -15,7 +15,7 @@ export default function SignupModal() {
         if (result?.token) {
             const user = await getUserFromToken();
             router.dismissAll();
-            router.push(user?.is_admin ? '/(tabs)/admin' : '/(tabs)/project');
+            router.replace(user?.is_admin ? '/(tabs)/admin' : '/(tabs)/project');
         } else {
             console.log('Login failed:', result.error);
         }

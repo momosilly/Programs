@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { View, Text, FlatList, Button } from "react-native";
+import { View, Text, FlatList, Button, Pressable } from "react-native";
 import { fetchRequests } from "../../src/api";
 import { useRouter } from "expo-router";
 import { logout } from "../../src/api";
@@ -26,12 +26,14 @@ export default function Submitted() {
                 data={projects}
                 keyExtractor={(item) => item.id.toString()}
                 renderItem={({ item }) => (
-                <View style={{ marginVertical: 10 }}>
-                    <Text>Name: {item.user_name}</Text>
-                    <Text>Objectives: {item.learning_objectives}</Text>
-                    <Text>Start: {item.start_date}</Text>
-                    <Text>Deadline: {item.deadline}</Text>
-                </View>
+                <Pressable onPress={() => router.push(`/projects/${item.id}`)}>
+                    <View style={{ marginVertical: 10 }}>
+                        <Text>Name: {item.user_name}</Text>
+                        <Text>Objectives: {item.learning_objectives}</Text>
+                        <Text>Start: {item.start_date}</Text>
+                        <Text>Deadline: {item.deadline}</Text>
+                    </View>
+                </Pressable>
                 )}
             />
             <Button title='Logout' onPress={async () => {

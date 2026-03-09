@@ -59,11 +59,11 @@ class Status(db.Model):
     project_id = db.Column(db.Integer, db.ForeignKey('projects.id'), nullable=False)
     pending = db.Column(db.Boolean, default=True)
     approved = db.Column(db.Boolean, default=False)
-    approved_at = db.Column(db.Date, default=datetime.now(UTC).date())
+    approved_at = db.Column(db.Date)
     handed_in = db.Column(db.Boolean, default=False)
-    handed_in_at = db.Column(db.Date, default=datetime.now(UTC).date())
+    handed_in_at = db.Column(db.Date)
     signed = db.Column(db.Boolean, default=False)
-    signed_at = db.Column(db.Date, default=datetime.now(UTC).date())
+    signed_at = db.Column(db.Date)
 
 #Auth routes
 @app.post("/signup")
@@ -214,16 +214,35 @@ def update_status(project_id):
     data = request.get_json()
 
     if not is_admin:
-        if "handed_in" in data:
-            status.handed_in = data['handed_in']
+        if data.get("handed_in"):
+            if not status.approved:
+                return jsonify({"error": "Project must be approved before handing in"})
+            
+            status.pending = False
+            status.approved = False
+            status.signed = False
+
+            status.handed_in = True
             status.handed_in_at = datetime.now(UTC).date()
+        
     if is_admin:
-        if "approved" in data:
-            status.approved = data['approved']
-            status.approved_at = datetime.now(UTC).date()
-        if "signed" in data:
-            status.signed = data['signed']
-            status.signed_at = datetime.now(UTC).date()
+        if data.get("approved"):
+            status.pending = False
+            status.handed_in = False
+            status.signed = False
+
+            status.approved = True
+            status.approved_at = datetime.now().date()
+
+        if data.get("signed"):
+            status.pending = False
+            status.approved = False
+            status.handed_in = False
+
+            status.signed = True
+            status.signed_at = datetime.now().date()
+
+           
 
     db.session.commit()
     return jsonify({"status": "updated"})

@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
-import { View, Text, FlatList } from "react-native";
+import { View, Text, FlatList, Pressable } from "react-native";
 import { fetchRequests } from "../../src/api";
+import { useRouter } from "expo-router";
 
 export default function Submitted() {
+    const router = useRouter()
     const [projects, setProjects] = useState<any[]>([]);
 
     useEffect(() => {
@@ -19,15 +21,15 @@ export default function Submitted() {
             <Text style={{ fontSize: 22, fontWeight: "bold" }}>
                 Your requests
             </Text>
-            <FlatList 
+            <FlatList
                 data={projects}
                 keyExtractor={(item) => item.id.toString()}
                 renderItem={({ item }) => (
-                <View style={{ marginVertical: 10 }}>
-                    <Text>Objectives: {item.learning_objectives}</Text>
-                    <Text>Start: {item.start_date}</Text>
-                    <Text>Deadline: {item.deadline}</Text>
-                </View>
+                <Pressable onPress={() => router.push(`projects/${item.id}`)}>
+                    <View style={{ marginVertical: 10 }}>
+                        <Text>Objectives: {item.learning_objectives}</Text>
+                    </View>
+                </Pressable>
                 )}
             />
         </View>
