@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getAuthKey } from "./storage/keys";
+import { Alert } from "react-native";
 
 interface LoginPayload {
     email: string
@@ -54,7 +55,7 @@ export const submitRequest = async ({text, startDate, deadline}: submitFetch) =>
         console.log("No token found");
         return;
     }
-
+    
     const response = await fetch("http://10.0.2.2:5000/submit", {
         method: "POST",
         headers: {
@@ -68,8 +69,20 @@ export const submitRequest = async ({text, startDate, deadline}: submitFetch) =>
         })
     });
     
-    const data = await response.json();
-    console.log(data);
+    try {
+        const data = await response.json();
+        console.log('Response status:', response.status, 'Data:', data);
+        if (!response.ok) {
+            Alert.alert('Error', data.error || "Something went wrong");
+            return;
+        }
+        Alert.alert("Success", "Project submitted!");
+        return data;
+    } catch (error) {
+        Alert.alert('Error', "Failed to parse response");
+        console.log('Parse error:', error);
+        return;
+    }
 };
 
 export const fetchRequests = async () => {

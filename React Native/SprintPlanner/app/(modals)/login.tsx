@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View, TextInput, Button, Text } from 'react-native'
+import { View, TextInput, Button, Text, Alert } from 'react-native'
 import { useRouter } from "expo-router";
 import { login } from "../../src/api";
 import { getUserFromToken } from "../../src/auth";
@@ -17,6 +17,7 @@ export default function LoginModal() {
             router.replace(user?.is_admin ? '/(tabs)/admin' : '/(tabs)/project');
         } else {
             console.log('Login failed:', result.error);
+            Alert.alert('Login failed', result.error);
         }
     };
 

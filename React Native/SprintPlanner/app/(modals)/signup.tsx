@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { View, Text, TextInput, Button } from 'react-native'
+import { useEffect, useState } from "react";
+import { View, Text, TextInput, Button, BackHandler, Alert } from 'react-native'
 import { useRouter } from "expo-router";
 import { signup } from "../../src/api";
 import { getUserFromToken } from "../../src/auth";
@@ -17,9 +17,23 @@ export default function SignupModal() {
             router.dismissAll();
             router.replace(user?.is_admin ? '/(tabs)/admin' : '/(tabs)/project');
         } else {
-            console.log('Login failed:', result.error);
+            console.log('Signup failed:', result.error);
+            Alert.alert("Signup failed", result.error);
         }
     };
+
+    useEffect(() => {
+        const onBackPress = () => {
+            return true
+        };
+
+        const subscription = BackHandler.addEventListener(
+            'hardwareBackPress',
+            onBackPress
+        );
+
+        return () => subscription.remove();
+    } ,[])
 
     return (
         <View style={{ padding: 20 }}>
