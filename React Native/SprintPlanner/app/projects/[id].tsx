@@ -23,7 +23,7 @@ export default function projectDetail() {
 
     useEffect(() => {
         async function load() {
-            const token = await AsyncStorage.getItem(getAuthKey("token"));
+            const token = await AsyncStorage.getItem(getAuthKey("access_token"));
             if (!token) return;
 
             const user = await getUserFromToken();
@@ -38,7 +38,7 @@ export default function projectDetail() {
     }, [])
 
     async function handleUpdate(field: string) {
-        const token = await AsyncStorage.getItem(getAuthKey("token"))
+        const token = await AsyncStorage.getItem(getAuthKey("access_token"))
         if (!token) return;
         const updated = await updateStatus(Number(id), { [field]: true }, token);
 
@@ -69,7 +69,7 @@ export default function projectDetail() {
             {isAdmin && (
                 <>
                     <Button title="Approve" onPress={() => handleUpdate("approved")} disabled={(status.approved || status.signed) ? true : false}/>
-                    <Button title="Sign" onPress={() => handleUpdate("signed")} disabled={(!status.approved) ? true : false} />
+                    <Button title="Sign" onPress={() => handleUpdate("signed")} disabled={(!status.approved || !status.handed_in) ? true : false} />
                 </>
             )}
         </View>

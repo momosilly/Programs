@@ -3,7 +3,7 @@ import { jwtDecode } from "jwt-decode";
 import { getAuthKey } from "./storage/keys";
 
 export async function getUserFromToken() {
-    const token = await AsyncStorage.getItem(getAuthKey("token"));
+    const token = await AsyncStorage.getItem(getAuthKey("access_token"));
     if (!token) return null;
 
     try {

@@ -7,6 +7,7 @@ from flask_jwt_extended import (
     JWTManager,
     jwt_required,
     create_access_token,
+    create_refresh_token,
     get_jwt_identity,
     get_jwt
 )
@@ -16,6 +17,8 @@ app.config['SECRET_KEY'] = 'mypassword'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://myuser:mypassword@localhost/sprintplanner'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config["JWT_SECRET_KEY"] = "super-secret-key"
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(minutes=15)
+app.config["JWT_REFRESH_TOKEN_EXPIRES"] = timedelta(days=7)
 
 
 db = SQLAlchemy(app)
@@ -81,11 +84,7 @@ def signup():
     db.session.add(user)
     db.session.commit()
 
-    token = create_access_token(
-        identity=str(user.id),
-        additional_claims={"is_admin": user.is_admin}
-    )
-    return jsonify(token=token)
+    return jsonify({"message": "Account created"}), 201
 
 @app.post("/login")
 def login():
@@ -95,15 +94,24 @@ def login():
 
     user = User.query.filter_by(email=email).first()
     if not user or not check_password_hash(user.password, password):
-        return jsonify({"error": "Invalid credentials"}), 401
+        return jsonify({"error": "Invalid email or password"}), 401
 
-    token = create_access_token(
-        identity=str(user.id),
-        additional_claims={"is_admin": user.is_admin}
-    )
-    return jsonify(token=token)
+    access_token = create_access_token(identity=str(user.id), additional_claims={"is_admin": user.is_admin})
+    refresh_token = create_refresh_token(identity=user.id)
+
+    return jsonify({
+        "access_token": access_token,
+        "refresh_token": refresh_token
+    }), 200
 
 #Protected routes
+@app.post("/refresh")
+@jwt_required(refresh=True)
+def refresh():
+    user_id = get_jwt_identity()
+    new_access_token = create_access_token(identity=user_id)
+    return jsonify({"access_token": new_access_token}), 200
+
 @app.post("/submit")
 @jwt_required()
 def submit_request():
@@ -119,21 +127,25 @@ def submit_request():
     start_date = datetime.fromisoformat(data["start_date"]).date()
     deadline = datetime.fromisoformat(data["deadline"]).date()
 
-    new_project = Project(
-        user_id=user_id,
-        learning_objectives=learning_objectives,
-        start_date=start_date,
-        deadline=deadline
-    )
+    if learning_objectives and start_date and deadline:
 
-    db.session.add(new_project)
-    db.session.commit()
+        new_project = Project(
+            user_id=user_id,
+            learning_objectives=learning_objectives,
+            start_date=start_date,
+            deadline=deadline
+        )
 
-    new_status = Status(project_id=new_project.id)
-    db.session.add(new_status)
-    db.session.commit()
+        db.session.add(new_project)
+        db.session.commit()
 
-    return jsonify({"status": "ok"})
+        new_status = Status(project_id=new_project.id)
+        db.session.add(new_status)
+        db.session.commit()
+
+        return jsonify({"status": "ok"})
+    else:
+        return jsonify({"error": "Make sure to fill in all the fields"}), 400
 
 @app.get("/projects")
 @jwt_required()
