@@ -63,13 +63,13 @@ export default function projectDetail() {
             <Text>Status: {getStatusLabel(status)}</Text>
 
             {!isAdmin && (
-                <Button title="Mark as handed in" onPress={() => handleUpdate("handed_in")} disabled={!status.approved}/>
+                <Button title="Mark as handed in" onPress={() => handleUpdate("handed_in")} disabled={(!status.approved || status.signed || status.handed_in) ? true : false}/>
             )}
 
             {isAdmin && (
                 <>
-                    <Button title="Approve" onPress={() => handleUpdate("approved")} disabled={(status.approved || status.signed) ? true : false}/>
-                    <Button title="Sign" onPress={() => handleUpdate("signed")} disabled={(!status.approved || !status.handed_in) ? true : false} />
+                    <Button title="Approve" onPress={() => handleUpdate("approved")} disabled={(status.approved || status.signed || status.handed_in) ? true : false}/>
+                    <Button title="Sign" onPress={() => handleUpdate("signed")} disabled={status.signed || status.approved || !status.handed_in} />
                 </>
             )}
         </View>

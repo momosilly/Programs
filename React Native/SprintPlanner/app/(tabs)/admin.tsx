@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { View, Text, FlatList, Button, Pressable } from "react-native";
+import { View, Text, FlatList, Button, Pressable, BackHandler } from "react-native";
 import { fetchRequests } from "../../src/api";
 import { useRouter } from "expo-router";
 import { logout } from "../../src/api";
@@ -14,6 +14,17 @@ export default function Submitted() {
         console.log("Is array:", Array.isArray(data));
         setProjects(Array.isArray(data) ? data : []);
     });
+
+    const onBackPress = () => {
+        return true;
+    }
+
+    const subscription = BackHandler.addEventListener(
+        'hardwareBackPress',
+        onBackPress
+    );
+
+    return () => subscription.remove();
     }, []);
 
     
