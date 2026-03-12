@@ -17,8 +17,10 @@ interface submitFetch {
     deadline: string
 }
 
+const API_URL = 'http://10.0.2.2:5000';
+
 export const signup = async ({name, email, password}: SignupPayload) => {
-    const response = await fetch("http://10.0.2.2:5000/signup", {
+    const response = await fetch(`${API_URL}/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body:JSON.stringify({ name, email, password })
@@ -29,7 +31,7 @@ export const signup = async ({name, email, password}: SignupPayload) => {
 };
 
 export const login = async ({email, password}: LoginPayload) => {
-    const response = await fetch("http://10.0.2.2:5000/login", {
+    const response = await fetch(`${API_URL}/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password })
@@ -56,7 +58,7 @@ const refreshAccessToken = async () => {
     const refreshToken = await getRefreshToken();
     if (!refreshToken) return null;
 
-    const response = await fetch("http://10.0.2.2:5000/refresh", {
+    const response = await fetch(`${API_URL}/refresh`, {
         method: "POST",
         headers: {
             "Authorization": `Bearer ${refreshToken}`
@@ -112,7 +114,7 @@ export const authFetch = async(url: string, options: RequestInit = {}) => {
 };
 
     export const submitRequest = async ({ text, startDate, deadline }: submitFetch) => {
-    const { response, data } = await authFetch("http://10.0.2.2:5000/submit", {
+    const { response, data } = await authFetch(`${API_URL}/submit`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -132,47 +134,29 @@ export const authFetch = async(url: string, options: RequestInit = {}) => {
     };
 
 export const fetchRequests = async () => {
-    const token = await AsyncStorage.getItem(getAuthKey('access_token'));
+    const { data } = await authFetch(`${API_URL}/projects`);
 
-    if (!token) {
-        console.log("No token found");
-        return [];
-    }
-
-    const response = await fetch("http://10.0.2.2:5000/projects", {
-        headers: {
-            "Authorization": `Bearer ${token}`
-        }
-    });
-
-    const data = await response.json();
     console.log(data);
     return data;
-}
+};
 
 export const logout = async () => {
   await AsyncStorage.multiRemove([getAuthKey("access_token"), getAuthKey("refresh_token")]);
 };
 
-export const getProject = async (id: number, token: string) => {
-    const response = await fetch(`http://10.0.2.2:5000/projects/${id}`, {
-        headers: {
-            "Authorization": `Bearer ${token}`
-        }
-    });
+export const getProject = async (id: number) => {
+    const { data } = await authFetch(`${API_URL}/projects/${id}`);
 
-    return response.json()
+    console.log(data);
+    return data;
 }
 
-export const updateStatus = async (id: number, data: any, token: string) => {
-    const response = await fetch (`http://10.0.2.2:5000/projects/${id}/status`, {
+export const updateStatus = async (id: number, body: any) => {
+    const { data } = await authFetch(`${API_URL}/projects/${id}/status`, {
         method: "PATCH",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify(data)
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
     });
-    
-    return response.json();
-}
+
+    return data;
+};

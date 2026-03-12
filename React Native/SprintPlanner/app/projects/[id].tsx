@@ -23,13 +23,10 @@ export default function projectDetail() {
 
     useEffect(() => {
         async function load() {
-            const token = await AsyncStorage.getItem(getAuthKey("access_token"));
-            if (!token) return;
-
             const user = await getUserFromToken();
             setIsAdmin(user?.is_admin ?? false);
 
-            const data = await getProject(Number(id), token);
+            const data = await getProject(Number(id));
             setProject(data.project);
             setStatus(data.status);
         }
@@ -40,9 +37,9 @@ export default function projectDetail() {
     async function handleUpdate(field: string) {
         const token = await AsyncStorage.getItem(getAuthKey("access_token"))
         if (!token) return;
-        const updated = await updateStatus(Number(id), { [field]: true }, token);
+        const updated = await updateStatus(Number(id), { [field]: true });
 
-        const data = await getProject(Number(id), token);
+        const data = await getProject(Number(id));
         setStatus(data.status);
     }
 
