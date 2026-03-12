@@ -155,7 +155,12 @@ def get_projects():
     is_admin = claims["is_admin"]
 
     if is_admin:
-        projects = db.session.query(Project, User).join(User, Project.user_id == User.id).all()
+        projects = ( 
+                db.session.query(Project, User, Status)
+                .join(User, Project.user_id == User.id)
+                .join(Status, Status.project_id == Project.id)
+                .all() 
+            )
         result = [
             {
                 "id": p.id,
@@ -163,22 +168,38 @@ def get_projects():
                 "start_date": p.start_date,
                 "deadline": p.deadline,
                 "user_id": p.user_id,
-                "user_name": u.name
+                "user_name": u.name,
+                "status": {
+                    "pending": s.pending,
+                    "approved": s.approved,
+                    "handed_in": s.handed_in,
+                    "signed": s.signed
+                }
             }
-            for p, u in projects
+            for p, u, s in projects
         ]
     else:
-        projects = Project.query.filter_by(user_id=user_id).all()
+        projects = ( 
+            db.session.query(Project, Status)
+            .join(Status, Status.project_id == Project.id)
+            .filter(Project.user_id == user_id)
+            .all()
+        )
         result = [
             {
                 "id": p.id,
                 "learning_objectives": p.learning_objectives,
                 "start_date": p.start_date,
                 "deadline": p.deadline,
-                "user_id": p.user_id
-
+                "user_id": p.user_id,
+                "status": {
+                    "pending": s.pending,
+                    "approved": s.approved,
+                    "handed_in": s.handed_in,
+                    "signed": s.signed
+                }
             }
-            for p in projects
+            for p, s in projects
         ]
     return jsonify(result)
 
@@ -258,6 +279,15 @@ def update_status(project_id):
 
     db.session.commit()
     return jsonify({"status": "updated"})
+
+# @app.patch('/projects/filter')
+# @jwt_required
+# def filter_projects(project_id):
+#     user_id = int(get_jwt_identity())
+#     claims = get_jwt()
+#     is_admin = claims['is_admin']
+
+#     status = Status.query.filter_by(project_id=project_id).first()
 
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0')
