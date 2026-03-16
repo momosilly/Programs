@@ -8,7 +8,7 @@ export default function RootLayout() {
 
     useEffect(() => {
         const checkAuth = async () => {
-            const token = await AsyncStorage.getItem(getAuthKey("token"));
+            const token = await AsyncStorage.getItem(getAuthKey("access_token"));
             if (!token) {
                 router.push("/(modals)/signup");
             }
