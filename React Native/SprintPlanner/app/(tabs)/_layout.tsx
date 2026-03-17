@@ -1,6 +1,7 @@
-import { Tabs } from 'expo-router';
+import { NativeTabs, Icon, Label } from 'expo-router/unstable-native-tabs';
 import { useEffect, useState } from 'react';
 import { getUserFromToken } from '../../src/auth';
+import { Platform } from 'react-native';
 
 export default function TabLayout() {
     const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
@@ -16,10 +17,33 @@ export default function TabLayout() {
     if (isAdmin === null) return null;
 
     return (
-        <Tabs initialRouteName={isAdmin ? 'admin' : 'project'}>
-            <Tabs.Screen name="project" options={{ title: "Projects", href: !isAdmin ? 'project' : null}} />
-            <Tabs.Screen name="submitted" options={{ title: "Submitted", href: !isAdmin ? 'submitted' : null }} />
-            <Tabs.Screen name="admin" options={{ title: "Admin Panel" , href: isAdmin ? 'admin' : null}} />
-        </Tabs>
-    )
+        <NativeTabs>
+            {!isAdmin && (
+                <NativeTabs.Trigger name='project'>
+                    <Label>Home</Label>
+                    <Icon 
+                        sf={{default: 'house', selected: 'house.fill'}}
+                        src={Platform.OS === 'android' ? require('../../assets/project.png') : undefined}
+                    />
+                </NativeTabs.Trigger>
+            )}
+            {!isAdmin && (
+                <NativeTabs.Trigger name='submitted'>
+                    <Label>Submitted</Label>
+                    <Icon 
+                        sf={{ default: 'tray', selected: 'tray.fill' }}
+                        src={Platform.OS === 'android' ? require('../../assets/submitted.png') : undefined}
+                    />
+                </NativeTabs.Trigger>
+            )}
+            {isAdmin && (
+                <NativeTabs.Trigger name='admin'>
+                    <Label>Admin Panel</Label>
+                    <Icon 
+                        src={require('../../assets/admin.png')}
+                    />
+                </NativeTabs.Trigger>
+            )}
+        </NativeTabs>
+    );
 }
