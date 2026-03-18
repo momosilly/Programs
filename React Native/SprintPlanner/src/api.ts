@@ -56,6 +56,7 @@ const getRefreshToken = async () => {
 
 const refreshAccessToken = async () => {
     const refreshToken = await getRefreshToken();
+    console.log("Attempting refresh with token:", refreshToken ? "✓ exists" : "✗ missing");
     if (!refreshToken) return null;
 
     const response = await fetch(`${API_URL}/refresh`, {
@@ -65,23 +66,42 @@ const refreshAccessToken = async () => {
         }
     });
 
-    if (!response.ok) return null;
+    console.log("Refresh response status:", response.status);
+    if (!response.ok) {
+        const errorData = await response.json();
+        console.log("Refresh failed:", errorData);
+        // 422 means refresh token is invalid/expired - don't retry
+        if (response.status === 422) {
+            await AsyncStorage.multiRemove([getAuthKey("access_token"), getAuthKey("refresh_token")]);
+        }
+        return null;
+    }
 
     const data = await response.json();
-    await AsyncStorage.setItem(getAuthKey("access_token"), data.access_token);
-    return data.access_token;
+    console.log("Refresh succeeded, got token:", data?.access_token ? "✓ yes" : "✗ no");
+    if (data?.access_token) {
+        await AsyncStorage.setItem(getAuthKey("access_token"), data.access_token);
+        return data.access_token;
+    }
+
+    return null;
 };
 
 export const authFetch = async(url: string, options: RequestInit = {}) => {
     let accessToken = await getAccessToken();
+    if (!accessToken) {
+        accessToken = await refreshAccessToken();
+    }
+
+    const buildHeaders = (token?: string) => ({
+        ...(options.headers || {}),
+        ...(token ? { Authorization: `Bearer ${token}` } : {})
+    });
 
     const doRequest = async (token?: string) => {
         const response = await fetch(url, {
             ...options,
-            headers: {
-                ...(options.headers || {}),
-                "Authorization": token ? `Bearer ${token}` : ""
-            }
+            headers: buildHeaders(token)
         });
 
         let data: any = null;
@@ -89,28 +109,30 @@ export const authFetch = async(url: string, options: RequestInit = {}) => {
             data = await response.json();
         } catch {}
 
-        if (response.status === 401 && data?.msg === "Token has expired") {
+        const shouldRefresh =
+            response.status === 401 &&
+            (data?.msg === "Token has expired" || data?.msg === "Missing Authorization Header");
+
+        if (shouldRefresh) {
             const newToken = await refreshAccessToken();
             if (!newToken) {
+                // Refresh failed - clear tokens and return 401
                 await AsyncStorage.multiRemove([getAuthKey("access_token"), getAuthKey("refresh_token")]);
-                Alert.alert("Session expired", "Please log in again.");
-                throw new Error("Token expired");
+                return { response, data };
             }
+
             const retryResponse = await fetch(url, {
                 ...options,
-                headers: {
-                    ...(options.headers || {}),
-                    "Authorization": `Bearer ${newToken}`
-                }
+                headers: buildHeaders(newToken)
             });
             const retryData = await retryResponse.json();
-            return { response: retryResponse, data: retryData }
+            return { response: retryResponse, data: retryData };
         }
 
-        return { response: response, data };
+        return { response, data };
     };
 
-    return doRequest(accessToken || undefined)
+    return doRequest(accessToken || undefined);
 };
 
     export const submitRequest = async ({ text, startDate, deadline }: submitFetch) => {
@@ -141,6 +163,7 @@ export const fetchRequests = async () => {
 };
 
 export const logout = async () => {
+  await AsyncStorage.setItem(getAuthKey("manual_logout"), "true");
   await AsyncStorage.multiRemove([getAuthKey("access_token"), getAuthKey("refresh_token")]);
 };
 

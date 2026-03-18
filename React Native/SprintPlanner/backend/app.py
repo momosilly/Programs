@@ -97,7 +97,7 @@ def login():
         return jsonify({"error": "Invalid email or password"}), 401
 
     access_token = create_access_token(identity=str(user.id), additional_claims={"is_admin": user.is_admin})
-    refresh_token = create_refresh_token(identity=user.id)
+    refresh_token = create_refresh_token(identity=str(user.id))
 
     return jsonify({
         "access_token": access_token,
@@ -109,7 +109,11 @@ def login():
 @jwt_required(refresh=True)
 def refresh():
     user_id = get_jwt_identity()
-    new_access_token = create_access_token(identity=user_id)
+    user = User.query.get(int(user_id))
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+    
+    new_access_token = create_access_token(identity=str(user.id), additional_claims={"is_admin": user.is_admin})
     return jsonify({"access_token": new_access_token}), 200
 
 @app.post("/submit")
