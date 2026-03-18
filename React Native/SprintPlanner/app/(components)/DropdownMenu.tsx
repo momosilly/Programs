@@ -50,7 +50,7 @@ export const DropdownMenu: React.FC<DropdownMenuProps> = ({
                             <View style={[
                                 styles.menu,
                                 {
-                                    top: position.y,
+                                    top: position.y - 40,
                                     left: position.x + position.width / 2 - dropdownWidth / 2,
                                     width: dropdownWidth
                                 },
