@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
-import { View, Text, FlatList, Button, Pressable, BackHandler, StyleSheet } from "react-native";
+import { View, Text, FlatList, Pressable, BackHandler, StyleSheet, Platform, Image } from "react-native";
 import { fetchRequests } from "../../src/api";
 import { useRouter } from "expo-router";
 import { logout } from "../../src/api";
 import { DropdownMenu } from "../(components)/DropdownMenu";
 import { MenuOption } from "../(components)/MenuOption";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Submitted() {
     const router = useRouter()
@@ -34,11 +35,11 @@ export default function Submitted() {
 
     
     return (
-        <View style={{ padding: 20 }}>
-            <Text style={{ fontSize: 22, fontWeight: "bold" }}>
+        <SafeAreaView style={{ padding: 20, paddingTop: 10, flex: 1, marginBottom: 34 }}>
+            <Text style={{ fontSize: 22, fontWeight: "bold", zIndex: 10}}>
                 Available requests
             </Text>
-            <View style={styles.container}>
+            <View style={[styles.filter, {alignItems: 'flex-end', paddingRight: 20, marginBottom: 20, zIndex: 20}]}>
                 <DropdownMenu
                     visible={visible}
                     handleOpen={() => setVisible(true)}
@@ -81,47 +82,92 @@ export default function Submitted() {
                     </MenuOption>
                 </DropdownMenu>
             </View>
-            <FlatList 
+            <FlatList
+                style={{ marginBottom: 70, paddingTop: 10, marginTop: 0}}
+                contentContainerStyle={{ paddingBottom: 16 }}
                 data={filteredProjects}
                 keyExtractor={(item) => item.id.toString()}
                 renderItem={({ item }) => (
-                <Pressable onPress={() => router.push(`/projects/${item.id}`)}>
+                <Pressable onPress={() => router.push(`/projects/${item.id}`)} style={styles.container}>
                     <View style={{ marginVertical: 10 }}>
                         <Text>Name: {item.user_name}</Text>
                         <Text>Objectives: {item.learning_objectives}</Text>
-                        <Text>Start: {item.start_date}</Text>
-                        <Text>Deadline: {item.deadline}</Text>
                     </View>
                 </Pressable>
                 )}
             />
-            <Button title='Logout' onPress={async () => {
-                await logout();
-                router.replace("/(modals)/login");
-            }} />
-        </View>
+            <Pressable 
+                onPress={async () => {
+                    await logout();
+                    router.replace("/(modals)/login")
+                }}
+                style={[styles.pressable, {position: 'absolute', top: 760, left: 20, borderTopWidth: StyleSheet.hairlineWidth}]}
+            >
+                <Image 
+                    source={require("../../assets/logout.png")}
+                    style={{ height: 24, width: 24 }}
+                />
+            </Pressable>
+        </SafeAreaView>
     )
 }
 
 const styles = StyleSheet.create({
-  container: {
+  filter: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#f5fcff',
   },
   triggerStyle: {
-    height: 40,
+    height: 38,
     backgroundColor: '#f5fcff',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    width: 100,
-    paddingHorizontal: 20,
-    paddingVertical: 10,
+    width: 70,
+    paddingHorizontal: 13,
+    paddingVertical: 8,
     borderRadius: 5,
+    borderColor: '#4f4f4f',
+    borderStyle: 'solid',
+    borderWidth: 1.5,
   },
   triggerText: {
     fontSize: 16,
-  }
+  },
+  pressable: {
+    borderWidth: 1,
+    borderColor: '#1b6cef',
+    borderStyle: 'solid',
+    borderRadius: 50,
+    backgroundColor: '#1b6cef',
+    padding: 10,
+    width: 50,
+    alignItems: 'center'
+  },
+  container: {
+    padding: 16,
+    marginHorizontal: 16,
+    marginTop: 24,
+    backgroundColor: "#fff",
+
+    ...(Platform.OS === "android"
+    ? {
+        borderRadius: 12,
+        elevation: 4,
+        shadowColor: "#000",
+        shadowOpacity: 0.15,
+        shadowRadius: 6,
+        shadowOffset: { width: 0, height: 3 },
+        }
+    : {
+        backgroundColor: "#fff",
+        padding: 16,
+        marginBottom: StyleSheet.hairlineWidth,
+        borderBottomWidth: StyleSheet.hairlineWidth,
+        borderBottomColor: "#ccc"
+        }),
+
+    }
 });
