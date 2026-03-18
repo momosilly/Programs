@@ -214,17 +214,34 @@ def get_single_project(project_id):
     claims = get_jwt()
     is_admin = claims["is_admin"]
 
-    project = Project.query.get(project_id)
-    if not project:
+    project_with_user = (
+        db.session.query(Project, User)
+        .join(User, Project.user_id == User.id)
+        .filter(Project.id == project_id)
+        .first()
+    )
+
+    if not project_with_user:
         return jsonify({"error": "Project not found"}), 404
-    
+
+    project, user = project_with_user
+
     if not is_admin and project.user_id != user_id:
         return jsonify({"error": "Unauthorized"}), 403
     
     status = Status.query.filter_by(project_id=project_id).first()
+    if not status:
+        return jsonify({"error": "Status not found"}), 404
 
-    return jsonify({
-        "project": project.to_dict(),
+    result = {
+        "project": {
+            "id": project.id,
+            "learning_objectives": project.learning_objectives,
+            "start_date": project.start_date,
+            "deadline": project.deadline,
+            "user_id": project.user_id,
+        },
+        "name": user.name,
         "status": {
             "pending": status.pending,
             "approved": status.approved,
@@ -234,7 +251,9 @@ def get_single_project(project_id):
             "signed": status.signed,
             "signed_at": status.signed_at
         }
-    })
+    }
+
+    return jsonify(result)
 
 @app.patch('/projects/<int:project_id>/status')
 @jwt_required()
