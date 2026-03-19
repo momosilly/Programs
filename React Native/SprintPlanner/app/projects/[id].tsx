@@ -1,7 +1,7 @@
 import React from "react";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useSegments, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { View, Text, Button, StyleSheet, Pressable } from "react-native";
+import { View, Text, Button, StyleSheet, Pressable, BackHandler } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getProject, updateStatus } from "../../src/api";
 import { getUserFromToken } from "../../src/auth";
@@ -48,6 +48,8 @@ export default function projectDetail() {
     const [status, setStatus] = useState<any | null>(null);
     const [name, setName] = useState<string | null>(null);
     const [isAdmin, setIsAdmin] = useState(false);
+    const segments = useSegments();
+    const router = useRouter();
 
     useEffect(() => {
         async function load() {
@@ -61,6 +63,20 @@ export default function projectDetail() {
         }
 
         load();
+
+        if (segments.includes('[id]') && segments.includes('projects')) {
+
+            const onBackPress = () => {
+                isAdmin ? router.replace('/admin') : router.replace('/submitted');
+                return true;
+            }
+
+            const subscription = BackHandler.addEventListener(
+                'hardwareBackPress',
+                onBackPress
+            )
+            return () => subscription.remove();
+        }
     }, [])
 
     async function handleUpdate(field: string) {
