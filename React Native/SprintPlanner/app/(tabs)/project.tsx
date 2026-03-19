@@ -1,9 +1,10 @@
 import { StatusBar } from 'expo-status-bar';
 import { useRouter } from 'expo-router';
-import { StyleSheet, Text, View, Pressable, TextInput, Button, Alert } from 'react-native';
+import { StyleSheet, Text, View, Pressable, TextInput, Button, Image, Platform } from 'react-native';
 import React, { useState } from "react";
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { submitRequest, logout } from '../../src/api';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function App() {
     const router = useRouter();
@@ -33,10 +34,9 @@ export default function App() {
     in7Days.setDate(today.getDate() + 7);
 
     const [height, setHeight] = useState(40);
-    const [items, setItems] = useState<[string, string | null][]>([]);
 
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={[styles.container, { padding: 20, paddingTop: 10, marginBottom: 34 }]}>
             <TextInput 
                 multiline
                 style={[styles.input, {height,}]}
@@ -48,7 +48,15 @@ export default function App() {
                 }
             />
             <View>
-                <Button title='Select start date' onPress={() => setShowstart(true)}/>
+                <Pressable 
+                    onPress={() => setShowstart(true)} 
+                    style={({ pressed }) => [
+                        styles.pressable,
+                        pressed && styles.pressablePressed
+                    ]}
+                >
+                    <Text style={styles.pressableText}>Select start date</Text>
+                </Pressable>
                 {showStart && (
                     <DateTimePicker 
                         value={startDate}
@@ -59,7 +67,16 @@ export default function App() {
                         maximumDate={in7Days}
                     />
                 )}
-                <Button title="Select deadline" onPress={() => setShowDeadline(true)}/>
+
+                <Pressable 
+                    onPress={() => setShowDeadline(true)} 
+                    style={({ pressed }) => [
+                        styles.pressable,
+                        pressed && styles.pressablePressed
+                    ]}
+                >
+                    <Text style={styles.pressableText}>Select deadline</Text>
+                </Pressable>
                 {showDeadline && (
                     <DateTimePicker 
                         value={deadline}
@@ -79,14 +96,34 @@ export default function App() {
                         deadline: deadline.toISOString().split("T")[0]
                     })
                 }
+                style={({ pressed }) => [
+                    styles.pressable,
+                    pressed && styles.pressablePressed
+                ]}
             >
-                <Text>Submit</Text>
+                <Text style={styles.pressableText}>Submit</Text>
             </Pressable>
-            <Button title='Logout' onPress={async () => {
-                await logout();
-                router.replace("/(modals)/login");
-            }} />
-        </View>
+            <Pressable 
+                onPress={async () => {
+                    await logout();
+                    router.replace("/(modals)/login")
+                }}
+                style={({ pressed }) => [
+                    styles.logout, 
+                    pressed && styles.pressablePressed, 
+                    {
+                        position: 'absolute', 
+                        bottom: 80, 
+                        left: 20, 
+                        borderTopWidth: StyleSheet.hairlineWidth
+                    }]}
+            >
+                <Image 
+                    source={require("../../assets/logout.png")}
+                    style={{ height: 24, width: 24 }}
+                />
+            </Pressable>
+        </SafeAreaView>
     );
 }
 
@@ -94,15 +131,65 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#fff',
-        alignItems: 'center',
         justifyContent: 'center',
     },
     input: {
-        minHeight: 40,
-        padding: 10,
-        width: 300,
-        borderWidth: 1,
-        borderColor: '#ccc',
-        borderRadius: 6
+        paddingVertical: Platform.OS === "android" ? 12 : 10,
+        paddingHorizontal: 14,
+        backgroundColor: "#fff",
+        fontSize: Platform.OS === "android" ? 16 : 17,
+
+        ...(Platform.OS === "android"
+        ? {
+            borderRadius: 6,
+            borderWidth: 1,
+            borderColor: "#ccc",
+            elevation: 1,
+            }
+        : {
+            borderRadius: 10,
+            borderWidth: StyleSheet.hairlineWidth,
+            borderColor: "#ccc",
+            }),
+
     },
+    pressable: {
+        marginTop: 20,
+        paddingTop: 3,
+        paddingBottom: 3,
+        alignItems: 'center',
+        alignSelf: 'center',
+        borderColor: '#1b6cef',
+        borderStyle: 'solid',
+        borderWidth: 1,
+        borderRadius: 10,
+        backgroundColor: '#1b6cef',
+        width: 240,
+
+        ...(Platform.OS === 'android'
+            ? {
+                elevation: 2
+            }
+            : {
+                borderWidth: StyleSheet.hairlineWidth
+            }
+        ) 
+    },
+    pressableText: {
+        color: "#fff",
+        fontSize: 18
+    },
+    pressablePressed: {
+        opacity: Platform.OS === 'ios' ? 0.5 : 1,
+        transform: Platform.OS === 'android' ? [{ scale: 0.97 }] : undefined
+    },
+    logout: {
+        borderColor: '#1b6cef',
+        borderStyle: 'solid',
+        borderRadius: 50,
+        backgroundColor: '#1b6cef',
+        padding: 10,
+        width: 50,
+        alignItems: 'center'
+    }
 });

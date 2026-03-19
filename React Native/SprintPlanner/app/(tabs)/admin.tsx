@@ -90,8 +90,8 @@ export default function Submitted() {
                 renderItem={({ item }) => (
                 <Pressable onPress={() => router.push(`/projects/${item.id}`)} style={styles.container}>
                     <View style={{ marginVertical: 10 }}>
-                        <Text>Name: {item.user_name}</Text>
-                        <Text>Objectives: {item.learning_objectives}</Text>
+                        <Text style={{fontSize: 15}}>Name: {item.user_name}</Text>
+                        <Text style={{fontSize: 15}}>Objectives: {item.learning_objectives}</Text>
                     </View>
                 </Pressable>
                 )}
@@ -101,7 +101,7 @@ export default function Submitted() {
                     await logout();
                     router.replace("/(modals)/login")
                 }}
-                style={[styles.pressable, {position: 'absolute', top: 760, left: 20, borderTopWidth: StyleSheet.hairlineWidth}]}
+                style={[styles.pressable, {position: 'absolute', bottom: 80, left: 20, borderTopWidth: StyleSheet.hairlineWidth}]}
             >
                 <Image 
                     source={require("../../assets/logout.png")}
@@ -129,9 +129,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 13,
     paddingVertical: 8,
     borderRadius: 5,
-    borderColor: '#4f4f4f',
+    borderColor: '#9f9f9f',
     borderStyle: 'solid',
     borderWidth: 1.5,
+    ...(Platform.OS === 'android'
+    ? {
+        elevation: 2
+    }
+    : {
+        borderWidth: StyleSheet.hairlineWidth
+    }
+) 
   },
   triggerText: {
     fontSize: 16,
