@@ -1,47 +1,84 @@
-package com.example.health_coach_v30
+package com.example.healthcoach
 
+import android.os.Build
 import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.example.health_coach_v30.ui.theme.Healthcoachv30Theme
+import android.util.Log
+import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.result.ActivityResultLauncher
+import androidx.health.connect.client.HealthConnectClient
+import androidx.health.connect.client.PermissionController
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
+
+    companion object {
+        private const val TAG        = "HealthCoach"
+        private const val SERVER_PORT = 8080
+    }
+
+    private lateinit var repo: HealthRepository
+    private lateinit var server: HealthServer
+    private lateinit var requestPermissionLauncher: ActivityResultLauncher<Set<String>>
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            Healthcoachv30Theme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+        // No setContentView — this activity has no UI.
+        // React Native runs in a separate process and talks to the server on localhost.
+
+        val isAndroid14Plus = Build.VERSION.SDK_INT >= 34
+        val packageName = if (isAndroid14Plus) {
+            "com.android.healthconnect.controller"
+        } else {
+            "com.google.android.apps.healthdata"
+        }
+
+        val sdkStatus = HealthConnectClient.getSdkStatus(this, packageName)
+        if (sdkStatus != HealthConnectClient.SDK_AVAILABLE) {
+            Log.e(TAG, "Health Connect not available (status=$sdkStatus). Server will not start.")
+            return
+        }
+
+        // Initialise repository
+        repo = HealthRepository(this)
+
+        // Register permission launcher and request any missing permissions immediately
+        requestPermissionLauncher = registerForActivityResult(
+            PermissionController.createRequestPermissionResultContract()
+        ) { granted ->
+            Log.d(TAG, "Permissions granted: ${granted.size}")
+        }
+
+        lifecycleScope.launch {
+            val granted = repo.getGrantedPermissions()
+            val needed  = repo.requiredPermissions() - granted
+            if (needed.isNotEmpty()) {
+                Log.d(TAG, "Requesting ${needed.size} missing permissions")
+                requestPermissionLauncher.launch(needed)
+            } else {
+                Log.d(TAG, "All permissions already granted")
             }
         }
+
+        // Start the local HTTP server
+        startServer()
     }
-}
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
+    private fun startServer() {
+        try {
+            server = HealthServer(applicationContext, repo, SERVER_PORT)
+            server.start()
+            Log.d(TAG, "HealthServer running on port $SERVER_PORT")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to start HealthServer", e)
+        }
+    }
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    Healthcoachv30Theme {
-        Greeting("Android")
+    override fun onDestroy() {
+        super.onDestroy()
+        if (::server.isInitialized && server.isAlive) {
+            server.stop()
+            Log.d(TAG, "HealthServer stopped")
+        }
     }
 }
