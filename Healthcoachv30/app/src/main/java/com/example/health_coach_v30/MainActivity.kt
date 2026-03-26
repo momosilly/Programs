@@ -8,6 +8,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.PermissionController
 import androidx.lifecycle.lifecycleScope
+import com.example.health_coach_v30.HealthRepository
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
