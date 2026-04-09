@@ -28,3 +28,34 @@ class Logs(db.Model):
     uid = db.Column(db.String(30))
     timestamp = db.Column(db.DateTime, default=datetime.now(UTC))
 
+@app.get("/scan")
+def scan():
+    uid = request.args.get("uid")
+
+    log = Logs(uid=uid)
+    db.session.add(log)
+    db.session.commit()
+
+    user = User.query.filter_by(uid=uid).first()
+
+    if user:
+        return {
+            "status": "ok",
+            "name": user.name,
+            "admin": user.is_admin
+        }
+    else:
+        return {
+            "status": "unknown_uid",
+            "uid": uid
+        }
+    
+@app.get("/admin")
+def admin_page():
+    uid = request.args.get("uid")
+    user = User.query.filter_by(uid=uid).first()
+
+    if not user or not user.is_admin:
+        return {"error": "Forbidden"}
+
+    return {"message": "Welcome admin!"}
