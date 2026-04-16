@@ -3,64 +3,79 @@
 #include <WiFi.h>
 #include <HTTPClient.h>
 
-const char* ssid = "iotroam";
-const char* password = "Deltion123";
+const char* ssid = "Mohamad's S20 FE";
+const char* password = "rfjv6743";
 
 #define SS_PIN 10
 #define RST_PIN 9
 #define LED_PIN 3
 #define BUZZER_PIN 4
 
+String pendingUID = "";
+
 MFRC522 rfid(SS_PIN, RST_PIN);
 
 void sendUID(String uid) {
   HTTPClient http;
-  String url = "" + uid;
+  String url = "http://10.149.71.237:5000/scan?uid=" + uid; 
+  Serial.println("Sending: " + url);
+
   http.begin(url);
   int code = http.GET();
+  Serial.println("HTTP code: " + String(code));
   http.end();
 }
 
 void setup() {
   Serial.begin(115200);
 
-  SPI.begin(6, 2, 7); // SCK, MISO, MOSI
+  WiFi.begin(ssid, password);
+  Serial.print("Connecting to WiFi");
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(300);
+    Serial.print(".");
+  }
+  Serial.println("\nConnected!");
+  Serial.println(WiFi.localIP());
 
-  pinMode(LED_PIN, OUTPUT);
-  digitalWrite(LED_PIN, LOW);
-
+  SPI.begin(6, 2, 7);
   rfid.PCD_Init();
   Serial.println("RFID ready");
 
+  pinMode(LED_PIN, OUTPUT);
   pinMode(BUZZER_PIN, OUTPUT);
-  digitalWrite(BUZZER_PIN, LOW);
 }
 
 void loop() {
-  if (!rfid.PICC_IsNewCardPresent()) return;
-  if (!rfid.PICC_ReadCardSerial()) return;
 
-  // LED aan
-  digitalWrite(LED_PIN, HIGH);
-
-  // Buzzer
-  digitalWrite(BUZZER_PIN, HIGH);
-  delay(150);
-  digitalWrite(BUZZER_PIN, LOW);
-
-  Serial.print("UID: ");
-  for (byte i = 0; i < rfid.uid.size; i++) {
-    Serial.print(rfid.uid.uidByte[i], HEX);
-    uidString += String(rfid.uid.uidByte[i], HEX);
+  // Verstuur pending UID
+  if (pendingUID != "") {
+    sendUID(pendingUID);
+    pendingUID = "";
   }
-  Serial.println();
 
-  sendUID(uidString)
+  // RFID lezen
+  if (rfid.PICC_IsNewCardPresent() && rfid.PICC_ReadCardSerial()) {
 
-  delay(500);
+    String uidString = "";
+    for (byte i = 0; i < rfid.uid.size; i++) {
+      if (rfid.uid.uidByte[i] < 0x10) uidString += "0";
+      uidString += String(rfid.uid.uidByte[i], HEX);
+    }
+    uidString.toUpperCase();
 
-  // LED uit
-  digitalWrite(LED_PIN, LOW);
+    Serial.println("UID: " + uidString);
 
-  rfid.PICC_HaltA();
+    pendingUID = uidString;
+
+    // LED + buzzer
+    digitalWrite(LED_PIN, HIGH);
+    digitalWrite(BUZZER_PIN, HIGH);
+    delay(150);
+    digitalWrite(BUZZER_PIN, LOW);
+    digitalWrite(LED_PIN, LOW);
+
+    rfid.PICC_HaltA();
+    delay(300);
+  }
 }
