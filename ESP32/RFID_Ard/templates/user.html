@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}{{ user.name or user.uid }}{% endblock %}
+
+{% block content %}
+<h1>{{ user.name or 'Onbekende gebruiker' }}</h1>
+
+<!-- User info card -->
+<div class="card">
+  <h2 style="margin-top:0">Mijn gegevens</h2>
+  <table style="width:auto">
+    <tr>
+      <th style="padding-right:32px">Naam</th>
+      <td>{{ user.name or '—' }}</td>
+    </tr>
+    <tr>
+      <th>UID</th>
+      <td><code>{{ user.uid }}</code></td>
+    </tr>
+    <tr>
+      <th>Rol</th>
+      <td>
+        {% if user.is_admin %}
+          <span class="badge badge-admin">Admin</span>
+        {% else %}
+          <span class="badge badge-user">Gebruiker</span>
+        {% endif %}
+      </td>
+    </tr>
+    <tr>
+      <th>Aantal scans</th>
+      <td>{{ logs | length }}</td>
+    </tr>
+  </table>
+</div>
+
+<!-- Logs card -->
+<div class="card">
+  <h2 style="margin-top:0">Mijn scans</h2>
+  {% if logs %}
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Tijdstip</th>
+        <th>UID</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for log in logs %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td>{{ log.timestamp.strftime('%d-%m-%Y %H:%M:%S') }}</td>
+        <td><code>{{ log.uid }}</code></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <p style="color:#888">Nog geen scans gevonden.</p>
+  {% endif %}
+</div>
+{% endblock %}
