@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}RFID Systeem{% endblock %}</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f2f5;
+      color: #222;
+      min-height: 100vh;
+    }
+
+    nav {
+      background: #1a1a2e;
+      color: white;
+      padding: 14px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    nav .brand { font-size: 1.1rem; font-weight: 700; letter-spacing: 1px; }
+    nav a { color: #aaa; text-decoration: none; margin-left: 20px; font-size: 0.9rem; }
+    nav a:hover { color: white; }
+
+    .container {
+      max-width: 1000px;
+      margin: 36px auto;
+      padding: 0 20px;
+    }
+
+    h1 { font-size: 1.6rem; margin-bottom: 24px; }
+    h2 { font-size: 1.2rem; margin-bottom: 14px; margin-top: 32px; }
+
+    .card {
+      background: white;
+      border-radius: 10px;
+      padding: 24px;
+      box-shadow: 0 1px 6px rgba(0,0,0,.08);
+      margin-bottom: 24px;
+    }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    th { text-align: left; padding: 10px 12px; background: #f7f7f7; border-bottom: 2px solid #e5e5e5; }
+    td { padding: 10px 12px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+
+    input[type="text"], input[type="password"] {
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 7px 10px;
+      font-size: 0.9rem;
+      width: 100%;
+    }
+    input[type="text"]:focus, input[type="password"]:focus {
+      outline: none;
+      border-color: #4f8ef7;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 7px 16px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .btn-primary  { background: #4f8ef7; color: white; }
+    .btn-danger   { background: #e74c3c; color: white; }
+    .btn-sm       { padding: 4px 10px; font-size: 0.8rem; }
+    .btn:hover    { opacity: 0.85; }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .badge-admin  { background: #fff3cd; color: #856404; }
+    .badge-user   { background: #d1ecf1; color: #0c5460; }
+
+    .error { color: #e74c3c; margin-top: 10px; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <span class="brand">🔑 RFID Systeem</span>
+  <div>
+    {% if current is defined and current %}
+      <span style="color:#ccc; font-size:.9rem">{{ current.name or current.uid }}</span>
+      <a href="/logout">Uitloggen</a>
+    {% endif %}
+  </div>
+</nav>
+
+<div class="container">
+  {% block content %}{% endblock %}
+</div>
+
+</body>
+</html>
