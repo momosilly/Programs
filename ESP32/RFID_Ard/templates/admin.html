@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}Beheerpaneel{% endblock %}
+
+{% block content %}
+<h1>Beheerpaneel</h1>
+
+<!-- Users table -->
+<div class="card">
+  <h2 style="margin-top:0">Gebruikers</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Naam</th>
+        <th>UID</th>
+        <th>Rol</th>
+        <th>Acties</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for user in users %}
+      <tr>
+        <td>{{ user.id }}</td>
+        <td>
+          <form method="POST" action="/admin/edit/{{ user.id }}" style="display:flex; gap:8px; align-items:center;">
+            <input type="text" name="name" value="{{ user.name or '' }}" placeholder="Geen naam" style="width:140px;">
+            <input type="checkbox" name="is_admin" id="admin_{{ user.id }}" {% if user.is_admin %}checked{% endif %}>
+            <label for="admin_{{ user.id }}" style="font-size:.8rem; white-space:nowrap">Admin</label>
+            <button type="submit" class="btn btn-primary btn-sm">Opslaan</button>
+          </form>
+        </td>
+        <td><code>{{ user.uid }}</code></td>
+        <td>
+          {% if user.is_admin %}
+            <span class="badge badge-admin">Admin</span>
+          {% else %}
+            <span class="badge badge-user">Gebruiker</span>
+          {% endif %}
+        </td>
+        <td>
+          <form method="POST" action="/admin/delete/{{ user.id }}"
+                onsubmit="return confirm('Weet je zeker dat je {{ user.name or user.uid }} wilt verwijderen?')">
+            <button type="submit" class="btn btn-danger btn-sm">Verwijderen</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- Logs table -->
+<div class="card">
+  <h2 style="margin-top:0">Laatste 100 scans</h2>
+  {% if logs %}
+  <table>
+    <thead>
+      <tr>
+        <th>Tijdstip</th>
+        <th>Naam</th>
+        <th>UID</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for log in logs %}
+      <tr>
+        <td>{{ log.timestamp.strftime('%d-%m-%Y %H:%M:%S') }}</td>
+        <td>{{ user_map[log.user_id].name or '—' }}</td>
+        <td><code>{{ log.uid }}</code></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <p style="color:#888">Nog geen scans gelogd.</p>
+  {% endif %}
+</div>
+{% endblock %}
