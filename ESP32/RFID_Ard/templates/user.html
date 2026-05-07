@@ -4,59 +4,55 @@
 {% block content %}
 <h1>{{ user.name or 'Onbekende gebruiker' }}</h1>
 
-<!-- User info card -->
+<!-- Days of this week -->
 <div class="card">
-  <h2 style="margin-top:0">Mijn gegevens</h2>
-  <table style="width:auto">
-    <tr>
-      <th style="padding-right:32px">Naam</th>
-      <td>{{ user.name or '—' }}</td>
-    </tr>
-    <tr>
-      <th>UID</th>
-      <td><code>{{ user.uid }}</code></td>
-    </tr>
-    <tr>
-      <th>Rol</th>
-      <td>
-        {% if user.is_admin %}
-          <span class="badge badge-admin">Admin</span>
-        {% else %}
-          <span class="badge badge-user">Gebruiker</span>
-        {% endif %}
-      </td>
-    </tr>
-    <tr>
-      <th>Aantal scans</th>
-      <td>{{ logs | length }}</td>
-    </tr>
+  <h2>Uren per dag – deze week</h2>
+  <table>
+    <thead>
+      <tr><th>Dag</th><th>Uren gewerkt</th></tr>
+    </thead>
+    <tbody>
+      {% for day, hours in daily %}
+      <tr>
+        <td>{{ day }}</td>
+        <td>
+          {% if hours > 0 %}
+            <strong>{{ hours }} u</strong>
+          {% else %}
+            <span style="color:#bbb">—</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
   </table>
 </div>
 
-<!-- Logs card -->
+<!-- Last 20 clock events -->
 <div class="card">
-  <h2 style="margin-top:0">Mijn scans</h2>
-  {% if logs %}
+  <h2>Recente klokgebeurtenissen</h2>
+  {% if events %}
   <table>
     <thead>
-      <tr>
-        <th>#</th>
-        <th>Tijdstip</th>
-        <th>UID</th>
-      </tr>
+      <tr><th>Tijdstip</th><th>Actie</th></tr>
     </thead>
     <tbody>
-      {% for log in logs %}
+      {% for e in events %}
       <tr>
-        <td>{{ loop.index }}</td>
-        <td>{{ log.timestamp.strftime('%d-%m-%Y %H:%M:%S') }}</td>
-        <td><code>{{ log.uid }}</code></td>
+        <td>{{ e.timestamp.strftime('%d-%m-%Y %H:%M:%S') }}</td>
+        <td>
+          {% if e.direction == 'in' %}
+            <span class="badge badge-in">Ingeklokt</span>
+          {% else %}
+            <span class="badge badge-out">Uitgeklokt</span>
+          {% endif %}
+        </td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
   {% else %}
-    <p style="color:#888">Nog geen scans gevonden.</p>
+    <p style="color:#888">Nog geen klokgebeurtenissen.</p>
   {% endif %}
 </div>
 {% endblock %}

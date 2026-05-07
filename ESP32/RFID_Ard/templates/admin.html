@@ -3,43 +3,73 @@
 
 {% block content %}
 <h1>Beheerpaneel</h1>
+<p style="color:#666; margin-top:-16px; margin-bottom:24px; font-size:.9rem;">
+  Week van {{ week_start.strftime('%d-%m-%Y') }} &nbsp;·&nbsp; Minimum: {{ min_hours }} uur
+</p>
 
-<!-- Users table -->
 <div class="card">
-  <h2 style="margin-top:0">Gebruikers</h2>
+  <h2>Medewerkers deze week</h2>
   <table>
     <thead>
       <tr>
-        <th>#</th>
-        <th>Naam</th>
-        <th>UID</th>
+        <th>Naam / UID</th>
+        <th>Email</th>
+        <th>Uren deze week</th>
+        <th>Status</th>
         <th>Rol</th>
-        <th>Acties</th>
+        <th>Bewerken</th>
+        <th></th>
       </tr>
     </thead>
     <tbody>
-      {% for user in users %}
+      {% for d in user_data %}
+      {% set u = d.user %}
       <tr>
-        <td>{{ user.id }}</td>
         <td>
-          <form method="POST" action="/admin/edit/{{ user.id }}" style="display:flex; gap:8px; align-items:center;">
-            <input type="text" name="name" value="{{ user.name or '' }}" placeholder="Geen naam" style="width:140px;">
-            <input type="checkbox" name="is_admin" id="admin_{{ user.id }}" {% if user.is_admin %}checked{% endif %}>
-            <label for="admin_{{ user.id }}" style="font-size:.8rem; white-space:nowrap">Admin</label>
-            <button type="submit" class="btn btn-primary btn-sm">Opslaan</button>
-          </form>
+          <strong>{{ u.name or '—' }}</strong><br>
+          <code style="font-size:.8rem; color:#888">{{ u.uid }}</code>
         </td>
-        <td><code>{{ user.uid }}</code></td>
+        <td style="color:#666; font-size:.85rem">{{ u.email or '—' }}</td>
         <td>
-          {% if user.is_admin %}
-            <span class="badge badge-admin">Admin</span>
+          {% if not u.is_admin %}
+            <span style="font-weight:700; color:{% if d.low_hours %}#e74c3c{% else %}#27ae60{% endif %}">
+              {{ d.hours }} u
+            </span>
+            {% if d.low_hours %}
+              <span class="badge badge-warning" style="margin-left:6px">Te weinig</span>
+            {% endif %}
           {% else %}
-            <span class="badge badge-user">Gebruiker</span>
+            <span style="color:#aaa">—</span>
           {% endif %}
         </td>
         <td>
-          <form method="POST" action="/admin/delete/{{ user.id }}"
-                onsubmit="return confirm('Weet je zeker dat je {{ user.name or user.uid }} wilt verwijderen?')">
+          {% if d.clocked_in %}
+            <span class="badge badge-in">● Ingeklokt</span>
+          {% else %}
+            <span class="badge badge-out">Uitgeklokt</span>
+          {% endif %}
+        </td>
+        <td>
+          {% if u.is_admin %}
+            <span class="badge badge-admin">Admin</span>
+          {% else %}
+            <span class="badge badge-user">Medewerker</span>
+          {% endif %}
+        </td>
+        <td>
+          <form method="POST" action="/admin/edit/{{ u.id }}"
+                style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
+            <input type="text"  name="name"  value="{{ u.name or '' }}"  placeholder="Naam"  style="width:110px">
+            <input type="email" name="email" value="{{ u.email or '' }}" placeholder="Email" style="width:150px">
+            <label style="font-size:.8rem; display:flex; align-items:center; gap:4px; white-space:nowrap">
+              <input type="checkbox" name="is_admin" {% if u.is_admin %}checked{% endif %}> Admin
+            </label>
+            <button type="submit" class="btn btn-primary btn-sm">Opslaan</button>
+          </form>
+        </td>
+        <td>
+          <form method="POST" action="/admin/delete/{{ u.id }}"
+                onsubmit="return confirm('Verwijder {{ u.name or u.uid }}?')">
             <button type="submit" class="btn btn-danger btn-sm">Verwijderen</button>
           </form>
         </td>
@@ -47,32 +77,5 @@
       {% endfor %}
     </tbody>
   </table>
-</div>
-
-<!-- Logs table -->
-<div class="card">
-  <h2 style="margin-top:0">Laatste 100 scans</h2>
-  {% if logs %}
-  <table>
-    <thead>
-      <tr>
-        <th>Tijdstip</th>
-        <th>Naam</th>
-        <th>UID</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for log in logs %}
-      <tr>
-        <td>{{ log.timestamp.strftime('%d-%m-%Y %H:%M:%S') }}</td>
-        <td>{{ user_map[log.user_id].name or '—' }}</td>
-        <td><code>{{ log.uid }}</code></td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  {% else %}
-    <p style="color:#888">Nog geen scans gelogd.</p>
-  {% endif %}
 </div>
 {% endblock %}

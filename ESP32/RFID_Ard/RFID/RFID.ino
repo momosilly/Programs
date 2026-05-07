@@ -17,7 +17,7 @@ MFRC522 rfid(SS_PIN, RST_PIN);
 
 void sendUID(String uid) {
   HTTPClient http;
-  String url = "http://10.149.71.237:5000/scan?uid=" + uid; 
+  String url = "http://10.160.89.237:5000/scan?uid=" + uid; 
   Serial.println("Sending: " + url);
 
   http.begin(url);
